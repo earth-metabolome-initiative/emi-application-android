@@ -27,9 +27,6 @@
             android:name=".HomeLogisticActivity"
             android:exported="false" />
         <activity
-            android:name=".HomeLigisticActivity"
-            android:exported="false" />
-        <activity
             android:name=".HomeLabActivity"
             android:exported="false" />
         <activity
