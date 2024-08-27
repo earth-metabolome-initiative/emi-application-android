@@ -1,0 +1,84 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center"
+    tools:context=".LoginActivity">
+
+    <TextView
+        android:id="@+id/welcomeMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to EMI application!"
+        android:visibility="invisible"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/LoginMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Please enter your Directus credentials"
+        android:visibility="invisible"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/usernameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Username"
+        android:visibility="invisible"
+        android:layout_marginBottom="4dp"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/usernameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="Enter your username"
+        android:visibility="invisible"
+        android:gravity="center_horizontal"
+        android:minHeight="48dp"
+        tools:ignore="HardcodedText,TextFields,VisualLintTextFieldSize"
+        android:autofillHints="" />
+
+    <TextView
+        android:id="@+id/passwordTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Password"
+        android:visibility="invisible"
+        android:layout_marginBottom="4dp"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/passwordEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="Enter your password"
+        android:visibility="invisible"
+        android:gravity="center_horizontal"
+        android:inputType="textPassword"
+        android:minHeight="48dp"
+        tools:ignore="HardcodedText,VisualLintTextFieldSize"
+        android:autofillHints="" />
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:text="Login"
+        android:textSize="18sp"
+        tools:ignore="HardcodedText" />
+
+</LinearLayout>
