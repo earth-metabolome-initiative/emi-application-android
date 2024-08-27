@@ -5,49 +5,49 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:gravity="center"
-    tools:context=".HomeActivity">
+    tools:context=".HomeLabActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="What do you want to do now?"
+        android:text="What do you want to do in the lab?"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/labButton"
+        android:id="@+id/preparingButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="laboratory stuff"
+        android:text="Prepare the samples"
         android:textSize="18sp"
         android:layout_marginBottom="15dp"
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/logisticButton"
+        android:id="@+id/weighingButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Logistic stuff"
+        android:text="Weight samples"
         android:textSize="18sp"
         android:layout_marginBottom="15dp"
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/searchButton"
+        android:id="@+id/extractionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Search samples"
+        android:text="Extract samples"
         android:textSize="18sp"
         android:layout_marginBottom="15dp"
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/signalButton"
+        android:id="@+id/aliquotingButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Signal samples"
+        android:text="Make aliquots"
         android:textSize="18sp"
         android:layout_marginBottom="15dp"
         tools:ignore="HardcodedText" />

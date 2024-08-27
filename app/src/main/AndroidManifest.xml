@@ -24,6 +24,15 @@
         android:theme="@style/Theme.EMI"
         tools:targetApi="31">
         <activity
+            android:name=".HomeLogisticActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HomeLigisticActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HomeLabActivity"
+            android:exported="false" />
+        <activity
             android:name=".HomeActivity"
             android:exported="false" />
         <activity
