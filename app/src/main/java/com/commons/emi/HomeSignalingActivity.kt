@@ -7,31 +7,31 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 
 @Suppress("DEPRECATION")
-class HomeLogisticActivity : AppCompatActivity() {
+class HomeSignalingActivity : AppCompatActivity() {
 
-    private lateinit var attributeButton: Button
-    private lateinit var moveButton: Button
+    private lateinit var simpleButton: Button
+    private lateinit var recursiveButton: Button
 
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home_logistic)
+        setContentView(R.layout.activity_home_signaling)
 
-        title = "Logistic screen"
+        title = "Signaling screen"
 
         // Add the back arrow to this screen
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back_arrow)
 
-        attributeButton = findViewById(R.id.attributeButton)
-        moveButton = findViewById(R.id.moveButton)
+        simpleButton = findViewById(R.id.simpleButton)
+        recursiveButton = findViewById(R.id.recursiveButton)
 
         val accessToken = intent.getStringExtra("ACCESS_TOKEN")
         val username = intent.getStringExtra("USERNAME")
         val password = intent.getStringExtra("PASSWORD")
 
         // Set up button click listeners here
-        attributeButton.setOnClickListener {
+        simpleButton.setOnClickListener {
             //val intent = Intent(this, HomeLabActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
@@ -39,7 +39,7 @@ class HomeLogisticActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        moveButton.setOnClickListener {
+        recursiveButton.setOnClickListener {
             //val intent = Intent(this, WeightingActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)

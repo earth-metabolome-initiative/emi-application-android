@@ -46,7 +46,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
         searchButton.setOnClickListener {
-            //val intent = Intent(this, ExtractionActivity::class.java)
+            val intent = Intent(this, HomeSearchActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)
@@ -54,7 +54,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
         signalButton.setOnClickListener {
-            //val intent = Intent(this, AliquotsActivity::class.java)
+            val intent = Intent(this, HomeSignalingActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)

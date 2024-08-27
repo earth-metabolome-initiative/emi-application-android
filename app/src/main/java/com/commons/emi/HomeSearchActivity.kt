@@ -7,31 +7,33 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 
 @Suppress("DEPRECATION")
-class HomeLogisticActivity : AppCompatActivity() {
+class HomeSearchActivity : AppCompatActivity() {
 
-    private lateinit var attributeButton: Button
-    private lateinit var moveButton: Button
+    private lateinit var sampleButton: Button
+    private lateinit var rangeButton: Button
+    private lateinit var speciesButton: Button
 
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home_logistic)
+        setContentView(R.layout.activity_home_search)
 
-        title = "Logistic screen"
+        title = "Search screen"
 
         // Add the back arrow to this screen
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back_arrow)
 
-        attributeButton = findViewById(R.id.attributeButton)
-        moveButton = findViewById(R.id.moveButton)
+        sampleButton = findViewById(R.id.sampleButton)
+        rangeButton = findViewById(R.id.rangeButton)
+        speciesButton = findViewById(R.id.speciesButton)
 
         val accessToken = intent.getStringExtra("ACCESS_TOKEN")
         val username = intent.getStringExtra("USERNAME")
         val password = intent.getStringExtra("PASSWORD")
 
         // Set up button click listeners here
-        attributeButton.setOnClickListener {
+        sampleButton.setOnClickListener {
             //val intent = Intent(this, HomeLabActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
@@ -39,7 +41,15 @@ class HomeLogisticActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        moveButton.setOnClickListener {
+        rangeButton.setOnClickListener {
+            //val intent = Intent(this, WeightingActivity::class.java)
+            intent.putExtra("ACCESS_TOKEN", accessToken)
+            intent.putExtra("USERNAME", username)
+            intent.putExtra("PASSWORD", password)
+            startActivity(intent)
+        }
+
+        speciesButton.setOnClickListener {
             //val intent = Intent(this, WeightingActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)

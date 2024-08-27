@@ -33,7 +33,6 @@ class HomeLabActivity : AppCompatActivity() {
         val accessToken = intent.getStringExtra("ACCESS_TOKEN")
         val username = intent.getStringExtra("USERNAME")
         val password = intent.getStringExtra("PASSWORD")
-        val isPrinterConnected = intent.getStringExtra("IS_PRINTER_CONNECTED")
 
         // Set up button click listeners here
         preparingButton.setOnClickListener {
@@ -45,63 +44,26 @@ class HomeLabActivity : AppCompatActivity() {
         }
 
         weighingButton.setOnClickListener {
-            if (isPrinterConnected == "yes") {
-                //val intent = Intent(this, WeightingActivity::class.java)
-                intent.putExtra("ACCESS_TOKEN", accessToken)
-                intent.putExtra("USERNAME", username)
-                intent.putExtra("PASSWORD", password)
-                intent.putExtra("IS_PRINTER_CONNECTED", isPrinterConnected)
-                startActivity(intent)
-            } else {
-                val activity = "WeightingActivity"
-                //val intent = Intent(this, WarningActivity::class.java)
-                intent.putExtra("ACCESS_TOKEN", accessToken)
-                intent.putExtra("USERNAME", username)
-                intent.putExtra("PASSWORD", password)
-                intent.putExtra("ACTIVITY", activity)
-                intent.putExtra("IS_PRINTER_CONNECTED", isPrinterConnected)
-                startActivity(intent)
-            }
+            intent.putExtra("ACCESS_TOKEN", accessToken)
+            intent.putExtra("USERNAME", username)
+            intent.putExtra("PASSWORD", password)
+            startActivity(intent)
         }
 
         extractionButton.setOnClickListener {
-            if (isPrinterConnected == "yes") {
-                //val intent = Intent(this, ExtractionActivity::class.java)
-                intent.putExtra("ACCESS_TOKEN", accessToken)
-                intent.putExtra("USERNAME", username)
-                intent.putExtra("PASSWORD", password)
-                intent.putExtra("IS_PRINTER_CONNECTED", isPrinterConnected)
-                startActivity(intent)
-            } else {
-                val activity = "ExtractionActivity"
-                //val intent = Intent(this, WarningActivity::class.java)
-                intent.putExtra("ACCESS_TOKEN", accessToken)
-                intent.putExtra("USERNAME", username)
-                intent.putExtra("PASSWORD", password)
-                intent.putExtra("ACTIVITY", activity)
-                intent.putExtra("IS_PRINTER_CONNECTED", isPrinterConnected)
-                startActivity(intent)
-            }
+            //val intent = Intent(this, ExtractionActivity::class.java)
+            intent.putExtra("ACCESS_TOKEN", accessToken)
+            intent.putExtra("USERNAME", username)
+            intent.putExtra("PASSWORD", password)
+            startActivity(intent)
         }
 
         aliquotingButton.setOnClickListener {
-            if (isPrinterConnected == "yes") {
-                //val intent = Intent(this, AliquotsActivity::class.java)
-                intent.putExtra("ACCESS_TOKEN", accessToken)
-                intent.putExtra("USERNAME", username)
-                intent.putExtra("PASSWORD", password)
-                intent.putExtra("IS_PRINTER_CONNECTED", isPrinterConnected)
-                startActivity(intent)
-            } else {
-                val activity = "AliquotsActivity"
-                //val intent = Intent(this, WarningActivity::class.java)
-                intent.putExtra("ACCESS_TOKEN", accessToken)
-                intent.putExtra("USERNAME", username)
-                intent.putExtra("PASSWORD", password)
-                intent.putExtra("ACTIVITY", activity)
-                intent.putExtra("IS_PRINTER_CONNECTED", isPrinterConnected)
-                startActivity(intent)
-            }
+            //val intent = Intent(this, AliquotsActivity::class.java)
+            intent.putExtra("ACCESS_TOKEN", accessToken)
+            intent.putExtra("USERNAME", username)
+            intent.putExtra("PASSWORD", password)
+            startActivity(intent)
         }
     }
 
