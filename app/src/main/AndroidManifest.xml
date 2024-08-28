@@ -24,6 +24,39 @@
         android:theme="@style/Theme.EMI"
         tools:targetApi="31">
         <activity
+            android:name=".SignalingRecursiveActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignalingSimpleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SearchSpeciesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SearchRangeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SearchSampleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LogisticMovingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LogisticAttributingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LabAliquotingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LabExtractionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LabWeighingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LabPrepActivity"
+            android:exported="false" />
+        <activity
             android:name=".HomeSignalingActivity"
             android:exported="false" />
         <activity

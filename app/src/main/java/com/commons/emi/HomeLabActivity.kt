@@ -36,7 +36,7 @@ class HomeLabActivity : AppCompatActivity() {
 
         // Set up button click listeners here
         preparingButton.setOnClickListener {
-            val intent = Intent(this, HomeLabActivity::class.java)
+            val intent = Intent(this, LabPrepActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)
@@ -44,6 +44,7 @@ class HomeLabActivity : AppCompatActivity() {
         }
 
         weighingButton.setOnClickListener {
+            val intent = Intent(this, LabWeighingActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)
@@ -51,7 +52,7 @@ class HomeLabActivity : AppCompatActivity() {
         }
 
         extractionButton.setOnClickListener {
-            //val intent = Intent(this, ExtractionActivity::class.java)
+            val intent = Intent(this, LabExtractionActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)
@@ -59,7 +60,7 @@ class HomeLabActivity : AppCompatActivity() {
         }
 
         aliquotingButton.setOnClickListener {
-            //val intent = Intent(this, AliquotsActivity::class.java)
+            val intent = Intent(this, LabAliquotingActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)

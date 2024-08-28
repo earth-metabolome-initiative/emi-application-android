@@ -34,7 +34,7 @@ class HomeSearchActivity : AppCompatActivity() {
 
         // Set up button click listeners here
         sampleButton.setOnClickListener {
-            //val intent = Intent(this, HomeLabActivity::class.java)
+            val intent = Intent(this, SearchSampleActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)
@@ -42,7 +42,7 @@ class HomeSearchActivity : AppCompatActivity() {
         }
 
         rangeButton.setOnClickListener {
-            //val intent = Intent(this, WeightingActivity::class.java)
+            val intent = Intent(this, SearchRangeActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)
@@ -50,7 +50,7 @@ class HomeSearchActivity : AppCompatActivity() {
         }
 
         speciesButton.setOnClickListener {
-            //val intent = Intent(this, WeightingActivity::class.java)
+            val intent = Intent(this, SearchSpeciesActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)

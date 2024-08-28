@@ -32,7 +32,7 @@ class HomeLogisticActivity : AppCompatActivity() {
 
         // Set up button click listeners here
         attributeButton.setOnClickListener {
-            //val intent = Intent(this, HomeLabActivity::class.java)
+            val intent = Intent(this, LogisticAttributingActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)
@@ -40,7 +40,7 @@ class HomeLogisticActivity : AppCompatActivity() {
         }
 
         moveButton.setOnClickListener {
-            //val intent = Intent(this, WeightingActivity::class.java)
+            val intent = Intent(this, LogisticMovingActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)

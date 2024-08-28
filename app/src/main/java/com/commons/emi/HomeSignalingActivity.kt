@@ -32,7 +32,7 @@ class HomeSignalingActivity : AppCompatActivity() {
 
         // Set up button click listeners here
         simpleButton.setOnClickListener {
-            //val intent = Intent(this, HomeLabActivity::class.java)
+            val intent = Intent(this, SignalingSimpleActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)
@@ -40,7 +40,7 @@ class HomeSignalingActivity : AppCompatActivity() {
         }
 
         recursiveButton.setOnClickListener {
-            //val intent = Intent(this, WeightingActivity::class.java)
+            val intent = Intent(this, SignalingRecursiveActivity::class.java)
             intent.putExtra("ACCESS_TOKEN", accessToken)
             intent.putExtra("USERNAME", username)
             intent.putExtra("PASSWORD", password)
