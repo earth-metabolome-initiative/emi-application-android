@@ -4,18 +4,21 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 
 @Suppress("DEPRECATION")
-class HomeLogisticActivity : AppCompatActivity() {
+class HomeLogisticActivity : BaseActivity() {
 
     private lateinit var attributeButton: Button
     private lateinit var moveButton: Button
 
+    override fun getLayoutResourceId(): Int {
+        return R.layout.activity_home_logistic // Replace with your actual login layout file
+    }
+
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home_logistic)
+        //setContentView(R.layout.activity_home_logistic)
 
         title = "Logistic screen"
 

@@ -24,6 +24,15 @@
         android:theme="@style/Theme.EMI"
         tools:targetApi="31">
         <activity
+            android:name=".PrinterConnectActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PrinterWarningActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PrinterAcceptActivity"
+            android:exported="false" />
+        <activity
             android:name=".SignalingRecursiveActivity"
             android:exported="false" />
         <activity

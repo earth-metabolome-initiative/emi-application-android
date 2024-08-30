@@ -4,13 +4,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 
 @Suppress("DEPRECATION")
-class HomeSignalingActivity : AppCompatActivity() {
+class HomeSignalingActivity : BaseActivity() {
 
     private lateinit var simpleButton: Button
     private lateinit var recursiveButton: Button
+
+    override fun getLayoutResourceId(): Int {
+        return R.layout.activity_home_signaling// Replace with your actual login layout file
+    }
 
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {

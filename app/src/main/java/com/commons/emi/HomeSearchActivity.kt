@@ -4,14 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 
 @Suppress("DEPRECATION")
-class HomeSearchActivity : AppCompatActivity() {
+class HomeSearchActivity : BaseActivity() {
 
     private lateinit var sampleButton: Button
     private lateinit var rangeButton: Button
     private lateinit var speciesButton: Button
+
+    override fun getLayoutResourceId(): Int {
+        return R.layout.activity_home_search // Replace with your actual login layout file
+    }
 
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {

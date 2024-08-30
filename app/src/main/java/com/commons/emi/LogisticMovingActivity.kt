@@ -2,11 +2,14 @@ package com.commons.emi
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-class LogisticMovingActivity : AppCompatActivity() {
+class LogisticMovingActivity : BaseActivity() {
+
+    override fun getLayoutResourceId(): Int {
+        return R.layout.activity_logistic_moving // Replace with your actual login layout file
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

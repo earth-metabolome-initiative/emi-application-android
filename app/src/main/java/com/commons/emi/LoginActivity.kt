@@ -9,22 +9,23 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : BaseActivity() {
 
     // Initialize UI elements
+    private lateinit var textViewBaseUrl: TextView
+    private lateinit var editTextBaseUrl:EditText
     private lateinit var welcomeMessage: TextView
     private lateinit var loginMessage: TextView
     private lateinit var textViewUsername: TextView
@@ -33,13 +34,16 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var editTextPassword: EditText
     private lateinit var buttonLogin: Button
 
+    override fun getLayoutResourceId(): Int {
+        return R.layout.activity_login // Replace with your actual login layout file
+    }
 
     @SuppressLint("SetTextI18n")
     // Function that is launched when activity is called
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Make the link with the corresponding xml
-        setContentView(R.layout.activity_login)
+        //setContentView(R.layout.activity_login)
 
         title = "Directus connection screen"
 
@@ -104,8 +108,11 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun performConnection() {
         // Retrieve UI elements from xml to perform action on them
+        textViewBaseUrl = findViewById(R.id.baseUrlTextView)
+        editTextBaseUrl = findViewById(R.id.baseUrlEditText)
         welcomeMessage = findViewById(R.id.welcomeMessage)
         loginMessage = findViewById(R.id.LoginMessage)
         textViewUsername = findViewById(R.id.usernameTextView)
@@ -115,6 +122,8 @@ class LoginActivity : AppCompatActivity() {
         buttonLogin = findViewById(R.id.loginButton)
 
         // Change welcome text and login button to ask user to download the new version
+        textViewBaseUrl.visibility = View.VISIBLE
+        editTextBaseUrl.visibility = View.VISIBLE
         welcomeMessage.visibility = View.VISIBLE
         loginMessage.visibility = View.VISIBLE
         textViewUsername.visibility = View.VISIBLE
@@ -126,77 +135,31 @@ class LoginActivity : AppCompatActivity() {
         // Define actions that are performed when user click on login button
         buttonLogin.setOnClickListener {
 
-            // Retrieve username and password entered by the user
-            val username = editTextUsername.text.toString()
-            val password = editTextPassword.text.toString()
-
             // display a message to inform user that the connection is in progress
             showToast("Connecting...")
 
-            // Start a coroutine to perform the connection to directus and retrieve access token to further operations in the app
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    val baseUrl = "https://emi-collection.unifr.ch/directus"
-                    val loginUrl = "$baseUrl/auth/login"
-                    val url = URL(loginUrl)
-                    val connection =
-                        withContext(Dispatchers.IO) {
-                            url.openConnection()
-                        } as HttpURLConnection
-                    connection.requestMethod = "POST"
-                    connection.setRequestProperty("Content-Type", "application/json")
-                    connection.doOutput = true
+            // Retrieve username and password entered by the user
+            val baseUrl = editTextBaseUrl.text.toString()
+            val username = editTextUsername.text.toString()
+            val password = editTextPassword.text.toString()
 
-                    val requestBody = "{\"email\":\"$username\",\"password\":\"$password\"}"
+            // Perform login in a coroutine to keep it asynchronous
+            CoroutineScope(Dispatchers.Main).launch {
+                val accessToken = withContext(Dispatchers.IO) {
+                    DirectusTokenManager.initialize(baseUrl, username, password)
+                    delay(2000)
+                    DirectusTokenManager.getAccessToken()
+                }
 
-                    val outputStream: OutputStream = connection.outputStream
-                    withContext(Dispatchers.IO) {
-                        outputStream.write(requestBody.toByteArray())
-                    }
-                    withContext(Dispatchers.IO) {
-                        outputStream.close()
-                    }
-
-                    val responseCode = connection.responseCode
-                    if (responseCode == HttpURLConnection.HTTP_OK) {
-                        val `in` = BufferedReader(InputStreamReader(connection.inputStream))
-                        val content = StringBuilder()
-                        var inputLine: String?
-                        while (withContext(Dispatchers.IO) {
-                                `in`.readLine()
-                            }.also { inputLine = it } != null) {
-                            content.append(inputLine)
-                        }
-                        withContext(Dispatchers.IO) {
-                            `in`.close()
-                        }
-
-                        val jsonData = content.toString()
-                        val jsonResponse = JSONObject(jsonData)
-                        val data = jsonResponse.getJSONObject("data")
-
-                        val accessToken = data.getString("access_token")
-
-                        // launch permission activity to ask permissions and pass important variables to it
-                        val intent =
-                            Intent(this@LoginActivity, HomeActivity::class.java)
-                        intent.putExtra("USERNAME", username)
-                        intent.putExtra("PASSWORD", password)
-                        intent.putExtra("ACCESS_TOKEN", accessToken)
-                        startActivity(intent)
-
-                        finish()
-
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            showToast("Connection error. Please check your credentials")
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    withContext(Dispatchers.Main) {
-                        showToast("Connection error. Please check you internet connection")
-                    }
+                if (accessToken != null) {
+                    showToast("Connected!")
+                    // Successful login, proceed to the next activity
+                    val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                } else {
+                    // Login failed, show an error message
+                    showToast("Login failed. Please check your credentials.")
                 }
             }
         }

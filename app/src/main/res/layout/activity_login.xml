@@ -8,6 +8,28 @@
     tools:context=".LoginActivity">
 
     <TextView
+        android:id="@+id/baseUrlTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Directus URL"
+        android:visibility="invisible"
+        android:layout_marginBottom="4dp"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/baseUrlEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="Enter your instance URL"
+        android:text="https://emi-collection.unifr.ch/directus"
+        android:visibility="invisible"
+        android:gravity="center_horizontal"
+        android:minHeight="48dp"
+        tools:ignore="HardcodedText,TextFields,VisualLintTextFieldSize"
+        android:autofillHints="" />
+
+    <TextView
         android:id="@+id/welcomeMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

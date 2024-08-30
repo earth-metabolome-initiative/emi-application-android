@@ -4,10 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 
 @Suppress("DEPRECATION")
-class HomeLabActivity : AppCompatActivity() {
+class HomeLabActivity : BaseActivity() {
+
+    override fun getLayoutResourceId(): Int {
+        return R.layout.activity_home_lab // Replace with your actual login layout file
+    }
 
     private lateinit var preparingButton: Button
     private lateinit var weighingButton: Button
@@ -17,9 +20,11 @@ class HomeLabActivity : AppCompatActivity() {
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home_lab)
+        //setContentView(R.layout.activity_home_lab)
 
         title = "Lab screen"
+
+        PermissionsManager.enableBluetoothAndLocation(this)
 
         // Add the back arrow to this screen
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -30,40 +35,27 @@ class HomeLabActivity : AppCompatActivity() {
         extractionButton = findViewById(R.id.extractionButton)
         aliquotingButton = findViewById(R.id.aliquotingButton)
 
-        val accessToken = intent.getStringExtra("ACCESS_TOKEN")
-        val username = intent.getStringExtra("USERNAME")
-        val password = intent.getStringExtra("PASSWORD")
-
         // Set up button click listeners here
         preparingButton.setOnClickListener {
             val intent = Intent(this, LabPrepActivity::class.java)
-            intent.putExtra("ACCESS_TOKEN", accessToken)
-            intent.putExtra("USERNAME", username)
-            intent.putExtra("PASSWORD", password)
             startActivity(intent)
         }
 
         weighingButton.setOnClickListener {
-            val intent = Intent(this, LabWeighingActivity::class.java)
-            intent.putExtra("ACCESS_TOKEN", accessToken)
-            intent.putExtra("USERNAME", username)
-            intent.putExtra("PASSWORD", password)
+            val intent = Intent(this, PrinterAcceptActivity::class.java)
+            intent.putExtra("ACTIVITY", "LabWeighingActivity")
             startActivity(intent)
         }
 
         extractionButton.setOnClickListener {
-            val intent = Intent(this, LabExtractionActivity::class.java)
-            intent.putExtra("ACCESS_TOKEN", accessToken)
-            intent.putExtra("USERNAME", username)
-            intent.putExtra("PASSWORD", password)
+            val intent = Intent(this, PrinterAcceptActivity::class.java)
+            intent.putExtra("ACTIVITY", "LabExtractionActivity")
             startActivity(intent)
         }
 
         aliquotingButton.setOnClickListener {
-            val intent = Intent(this, LabAliquotingActivity::class.java)
-            intent.putExtra("ACCESS_TOKEN", accessToken)
-            intent.putExtra("USERNAME", username)
-            intent.putExtra("PASSWORD", password)
+            val intent = Intent(this, PrinterAcceptActivity::class.java)
+            intent.putExtra("ACTIVITY", "LabAliquotingActivity")
             startActivity(intent)
         }
     }
