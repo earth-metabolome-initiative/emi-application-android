@@ -8,17 +8,13 @@ import androidx.core.view.WindowInsetsCompat
 class SearchRangeActivity : BaseActivity() {
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.activity_search_range// Replace with your actual login layout file
+        return R.layout.activity_search_range
     }
 
-    override fun setupContentFrame() {
-        TODO("Not yet implemented")
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_search_range)
         title = "Search by range screen"
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

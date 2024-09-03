@@ -13,17 +13,12 @@ class HomeSearchActivity : BaseActivity() {
     private lateinit var speciesButton: Button
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.activity_home_search // Replace with your actual login layout file
-    }
-
-    override fun setupContentFrame() {
-        TODO("Not yet implemented")
+        return R.layout.activity_home_search
     }
 
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home_search)
 
         title = "Search screen"
 

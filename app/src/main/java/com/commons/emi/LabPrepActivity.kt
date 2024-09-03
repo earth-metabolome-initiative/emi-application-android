@@ -1,15 +1,12 @@
 package com.commons.emi
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.camera.view.PreviewView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,10 +21,10 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
 
-@Suppress("DEPRECATION")
 class LabPrepActivity : BaseActivity() {
 
     // Initiate the displayed objects
+    private lateinit var textContainer: TextView
     private lateinit var scanButtonContainer: Button
     private lateinit var emptyPlace: TextView
     private lateinit var textSample: TextView
@@ -46,22 +43,15 @@ class LabPrepActivity : BaseActivity() {
         return R.layout.activity_lab_prep
     }
 
-    override fun setupContentFrame() {
-        TODO("Not yet implemented")
-    }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         title = "Preparation screen"
 
-        // Add the back arrow to this screen
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back_arrow)
-
         // Initialize objects views
+        textContainer = findViewById(R.id.textContainer)
         scanButtonContainer = findViewById(R.id.scanButtonContainer)
         emptyPlace = findViewById(R.id.emptyPlace)
         textSample = findViewById(R.id.textSample)
@@ -106,7 +96,7 @@ class LabPrepActivity : BaseActivity() {
             isObjectScanActive = true
             isQrScannerActive = true
             previewView.visibility = View.VISIBLE
-            scanStatus.text = "Scan a falcon"
+            scanStatus.text = "Scan a sample"
             flashlightButton.visibility = View.VISIBLE
             scanButtonContainer.visibility = View.INVISIBLE
             textSample.visibility = View.INVISIBLE
@@ -137,44 +127,67 @@ class LabPrepActivity : BaseActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.Main) {
                 if (isContainerScanActive) {
-                    if (scanButtonContainer.text.toString().matches(Regex("^container_\\d{6}$"))) {
-                        // permits to calculate places in container
-                        val places =
-                            ContainerManager.checkContainer(scanButtonContainer.text.toString())
-                        if (places > 0) {
-                            textSample.visibility = View.VISIBLE
-                            scanButtonSample.visibility = View.VISIBLE
-                            emptyPlace.visibility = View.VISIBLE
-                            emptyPlace.setTextColor(Color.GRAY)
-                            emptyPlace.text =
-                                "This container should still contain $places empty places"
-                        } else if (places == 0) {
-                            emptyPlace.visibility = View.VISIBLE
-                            emptyPlace.text = "This container is full, please scan another one"
-                            scanButtonContainer.text = "Value"
-                            scanButtonSample.text = "Begin to scan samples"
-                            emptyPlace.setTextColor(Color.RED)
-                        } else if (places == -1) {
-                            textSample.visibility = View.VISIBLE
-                            scanButtonSample.visibility = View.VISIBLE
-                            emptyPlace.visibility = View.VISIBLE
-                            emptyPlace.setTextColor(Color.GRAY)
-                            emptyPlace.text =
-                                "This container is not determined as finite."
-                        } else {
-                            emptyPlace.visibility = View.VISIBLE
-                            emptyPlace.text = "Unknown error, please restart the application."
-                            scanButtonContainer.visibility = View.INVISIBLE
-                            scanButtonSample.visibility = View.INVISIBLE
-                            emptyPlace.setTextColor(Color.RED)
-                        }
+                    val places =
+                        ContainerManager.checkContainer(scanButtonContainer.text.toString())
+                    if (places > 0) {
+                        textSample.visibility = View.VISIBLE
+                        scanButtonSample.visibility = View.VISIBLE
+                        emptyPlace.visibility = View.VISIBLE
+                        emptyPlace.setTextColor(Color.GRAY)
+                        emptyPlace.text =
+                            "This container should still contain $places empty places"
+                    } else if (places == 0) {
+                        emptyPlace.visibility = View.VISIBLE
+                        emptyPlace.text = "This container is full, please scan another one"
+                        scanButtonContainer.text = "Value"
+                        scanButtonSample.visibility = View.INVISIBLE
+                        textSample.visibility = View.INVISIBLE
+                        emptyPlace.setTextColor(Color.RED)
+                    } else if (places == -1) {
+                        emptyPlace.visibility = View.VISIBLE
+                        emptyPlace.text = "You are trying to scan a sample tube, please scan a valid container."
+                        scanButtonSample.visibility = View.INVISIBLE
+                        textSample.visibility = View.INVISIBLE
+                        emptyPlace.setTextColor(Color.RED)
+                    } else if (places == -3) {
+                        textSample.visibility = View.VISIBLE
+                        scanButtonSample.visibility = View.VISIBLE
+                        emptyPlace.visibility = View.VISIBLE
+                        emptyPlace.setTextColor(Color.GRAY)
+                        emptyPlace.text =
+                            "This container is not determined as finite."
+                    } else if (places == -4) {
+                        emptyPlace.visibility = View.VISIBLE
+                        emptyPlace.text = "Invalid container, please scan a valid one."
+                        scanButtonSample.visibility = View.INVISIBLE
+                        textSample.visibility = View.INVISIBLE
+                        emptyPlace.setTextColor(Color.RED)
+                    }else {
+                        showToast("places: $places")
+                        emptyPlace.visibility = View.VISIBLE
+                        emptyPlace.text = "Unknown error, please restart the application."
+                        scanButtonContainer.visibility = View.INVISIBLE
+                        scanButtonSample.visibility = View.INVISIBLE
+                        textSample.visibility = View.INVISIBLE
+                        emptyPlace.setTextColor(Color.RED)
                     }
                 } else if (isObjectScanActive) {
                     val containerId = scanButtonContainer.text.toString()
                     val sampleId = scanButtonSample.text.toString()
-                    withContext(Dispatchers.IO) {
-                        sendDataToDirectus(sampleId, containerId)
-                    }
+                    val containerModel = ContainerManager.getContainerModel(containerId)
+                    val sampleModel = ContainerManager.getContainerModel(sampleId)
+                    val isPairLegal = ContainerManager.checkContainerHierarchy(containerModel, sampleModel)
+                    if (isPairLegal) {
+                        val sampleKey = ContainerManager.getPrimaryKey(sampleId)
+                        val containerKey = ContainerManager.getPrimaryKey(containerId)
+                        withContext(Dispatchers.IO) {
+                            sendDataToDirectus(sampleKey, containerKey)
+                        }
+                    } else {
+                            emptyPlace.visibility = View.VISIBLE
+                            emptyPlace.setTextColor(Color.RED)
+                            emptyPlace.text = "Invalid pair. You are not allowed to put this child container in this parent container."
+                        }
                 }
             }
         }
@@ -183,17 +196,14 @@ class LabPrepActivity : BaseActivity() {
     // Function to send data to Directus
     @SuppressLint("SetTextI18n")
     private suspend fun sendDataToDirectus(
-        sampleId: String,
-        containerId: String
+        sampleKey: Int,
+        containerKey: Int
     ) {
         // Perform the POST request to add the values on directus
         try {
             // Retrieve primary keys, token and URL
             val collectionUrl = DirectusTokenManager.getInstance() + "/items/Dried_Samples_Data"
             val accessToken = DirectusTokenManager.getAccessToken()
-            showToast("sample id: $sampleId, container id: $containerId")
-            val sampleKey = ContainerManager.getPrimaryKey(sampleId)
-            val containerKey = ContainerManager.getPrimaryKey(containerId)
 
             val client = OkHttpClient()
 
@@ -217,7 +227,7 @@ class LabPrepActivity : BaseActivity() {
             val responseCode = response.code
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 // Display a Toast with the response message
-                showToast("$sampleId correctly added to database")
+                showToast("Data correctly added to database")
 
                 // Check if there is still enough place in the rack before initiating the QR code reader
                 withContext(Dispatchers.Main) {
@@ -254,45 +264,12 @@ class LabPrepActivity : BaseActivity() {
                 withContext(Dispatchers.Main) {
                     emptyPlace.visibility = View.VISIBLE
                     emptyPlace.text =
-                        "sample $sampleId has already been added to database. If you want to move it to another container, please use the move stuff mode."
+                        "Data already added to database. If you want to move it to another container, please use the move stuff mode."
                 }
             }
         } catch (e: IOException) {
             showToast("Error: $e")
             }
-    }
-
-    // Function to redirect user to connection page if connection is lost.
-    private fun goToConnectionActivity(){
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
-    }
-
-    // Connect the back arrow to the action to go back to home page
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                return if (isQrScannerActive){
-                    ScanManager.stopScanning()
-                    isQrScannerActive = false
-                    previewView.visibility = View.INVISIBLE
-                    flashlightButton.visibility = View.INVISIBLE
-                    scanButtonContainer.visibility = View.VISIBLE
-                    noneButton.visibility = View.INVISIBLE
-                    scanStatus.text = ""
-                    if (isObjectScanActive){
-                        textSample.visibility = View.VISIBLE
-                        scanButtonSample.visibility = View.VISIBLE
-                        noneButton.visibility = View.INVISIBLE
-                    }
-                    true
-                } else {
-                    onBackPressed()
-                    true
-                }
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     // Function to easily display toasts.

@@ -9,11 +9,7 @@ import android.widget.Button
 class HomeLabActivity : BaseActivity() {
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.activity_home_lab // Replace with your actual login layout file
-    }
-
-    override fun setupContentFrame() {
-        TODO("Not yet implemented")
+        return R.layout.activity_home_lab
     }
 
     private lateinit var preparingButton: Button
@@ -24,7 +20,6 @@ class HomeLabActivity : BaseActivity() {
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //setContentView(R.layout.activity_home_lab)
 
         title = "Lab screen"
 
@@ -46,19 +41,19 @@ class HomeLabActivity : BaseActivity() {
         }
 
         weighingButton.setOnClickListener {
-            val intent = Intent(this, PrinterAcceptActivity::class.java)
+            //val intent = Intent(this, PrinterAcceptActivity::class.java)
             intent.putExtra("ACTIVITY", "LabWeighingActivity")
             startActivity(intent)
         }
 
         extractionButton.setOnClickListener {
-            val intent = Intent(this, PrinterAcceptActivity::class.java)
+            //val intent = Intent(this, PrinterAcceptActivity::class.java)
             intent.putExtra("ACTIVITY", "LabExtractionActivity")
             startActivity(intent)
         }
 
         aliquotingButton.setOnClickListener {
-            val intent = Intent(this, PrinterAcceptActivity::class.java)
+            //val intent = Intent(this, PrinterAcceptActivity::class.java)
             intent.putExtra("ACTIVITY", "LabAliquotingActivity")
             startActivity(intent)
         }

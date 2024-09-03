@@ -4,11 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import com.bradysdk.api.printerconnection.PrinterProperties
+import com.bradysdk.api.printerdiscovery.DiscoveredPrinterInformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -37,16 +40,10 @@ class LoginActivity : BaseActivity() {
         return R.layout.activity_login
     }
 
-    override fun setupContentFrame() {
-        layoutInflater.inflate(R.layout.activity_login, findViewById(R.id.activity_content), true)
-    }
-
     @SuppressLint("SetTextI18n")
     // Function that is launched when activity is called
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Make the link with the corresponding xml
-        //setContentView(R.layout.activity_login)
 
         title = "Connection screen"
 

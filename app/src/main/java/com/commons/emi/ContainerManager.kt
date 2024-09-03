@@ -42,26 +42,37 @@ object ContainerManager {
                             val id = firstItem.optInt("id")
                             // Check if columns and rows are valid
                             val capacity = columns * rows
-                            val load = checkLoad(id)
-                            result = capacity - load
-                            result
+                            if (capacity == 1) {
+                                result = -1
+                                result
+
+                            } else {
+                                val load = checkLoad(id)
+                                if (load == -1) {
+                                    -2
+                                } else {
+                                    result = capacity - load
+                                    result
+                                }
+                            }
+
                         } else {
-                            result = -1 // container not finite
+                            result = -3 // container not finite
                             result
                         }
                     } else {
-                        result = -2 // no data found
+                        result = -4 // no data found
                         result
                     }
                 } else {
-                    result = -3 //response body null
+                    result = -5 //response body null
                     result
                 }
             } else {
-                -4// non 200 response
+                -6// non 200 response
             }
         } catch (e: IOException) {
-            -5 // internet or other errors
+            -7 // internet or other errors
         }
     }
 
@@ -180,4 +191,74 @@ object ContainerManager {
         }
     }
 
+    suspend fun getContainerModel(container: String): Int = withContext(Dispatchers.IO) {
+        try {
+            val result: Int
+            val collectionUrl =
+                "${DirectusTokenManager.getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val containerModel = firstItem.optInt("container_model")
+                        result = containerModel
+                        result
+                    } else {
+                        result = -2 // no data found
+                        result
+                    }
+                } else {
+                    result = -3 //response body null
+                    result
+                }
+            } else {
+                -4// non 200 response
+            }
+        } catch (e: IOException) {
+            -5 // internet or other errors
+        }
+    }
+
+    suspend fun checkContainerHierarchy(containerKey: Int, sampleKey: Int): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val collectionUrl =
+                "${DirectusTokenManager.getInstance()}/items/Container_Rules?filter[parent_container][_eq]=$containerKey&&filter[child_container][_eq]=$sampleKey&&limit=1"
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+                val jsonObject = JSONObject(responseBody.toString())
+                val dataArray = jsonObject.getJSONArray("data")
+                Log.d("ContainerManager", "$dataArray")
+
+                // Check if response body is not null and parse it
+                dataArray.length() > 0
+
+            } else {
+                false
+            }
+        } catch (e: IOException) {
+            false
+        }
+    }
 }

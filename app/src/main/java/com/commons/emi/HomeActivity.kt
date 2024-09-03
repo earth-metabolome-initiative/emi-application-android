@@ -5,7 +5,8 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 
-abstract class HomeActivity : BaseActivity() {
+
+class HomeActivity : BaseActivity() {
 
     private lateinit var labButton: Button
     private lateinit var logisticButton: Button
@@ -16,15 +17,9 @@ abstract class HomeActivity : BaseActivity() {
         return R.layout.activity_home
     }
 
-    override fun setupContentFrame() {
-        layoutInflater.inflate(R.layout.activity_home, findViewById(R.id.activity_content), true)
-    }
-
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Make the link with the corresponding xml
-        //setContentView(R.layout.activity_home)
 
         title = "Home screen"
 
@@ -74,9 +69,9 @@ abstract class HomeActivity : BaseActivity() {
             if (cameraPermission) {
                 val intent = Intent(this, HomeSignalingActivity::class.java)
                 startActivity(intent)
-        } else {
-            showToast()
-        }
+            } else {
+                showToast()
+            }
         }
     }
 

@@ -8,17 +8,12 @@ import androidx.core.view.WindowInsetsCompat
 class LogisticAttributingActivity : BaseActivity() {
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.activity_logistic_attributing// Replace with your actual login layout file
-    }
-
-    override fun setupContentFrame() {
-        TODO("Not yet implemented")
+        return R.layout.activity_logistic_attributing
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_logistic_attributing)
         title = "Containers screen"
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

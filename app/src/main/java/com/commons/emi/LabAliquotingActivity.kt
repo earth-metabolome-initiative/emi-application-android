@@ -8,18 +8,15 @@ import androidx.core.view.WindowInsetsCompat
 class LabAliquotingActivity : BaseActivity() {
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.activity_lab_aliquoting // Replace with your actual login layout file
-    }
-
-    override fun setupContentFrame() {
-        TODO("Not yet implemented")
+        return R.layout.activity_lab_aliquoting
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_lab_aliquoting)
+
         title = "Aliquoting screen"
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)

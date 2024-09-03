@@ -34,7 +34,7 @@ object ScanManager{
     private lateinit var camera: Camera
     private lateinit var scanner: BarcodeScanner
     private var flashlightButton: Button? = null
-    private var absentButton: Button? = null
+    private var noneButton: Button? = null
 
     private lateinit var cameraExecutor: ExecutorService
     private var previewView: PreviewView? = null
@@ -43,17 +43,17 @@ object ScanManager{
     private lateinit var sharedPreferences: SharedPreferences
 
     // Modify initialize function to return the scanned value
-    fun initialize(context: Context, previewView: PreviewView, flashlightButton: Button, absentButton: Button? = null, callback: (String) -> Unit) {
+    fun initialize(context: Context, previewView: PreviewView, flashlightButton: Button, noneButton: Button? = null, callback: (String) -> Unit) {
         this.previewView = previewView
         cameraExecutor = Executors.newSingleThreadExecutor()
         scanner = createBarcodeScanner()
         startCamera(context)
 
         this.flashlightButton = flashlightButton
-        if (absentButton != null) {
-            this.absentButton = absentButton
-            this.absentButton?.setOnClickListener {
-                callback("absent")
+        if (noneButton != null) {
+            this.noneButton = noneButton
+            this.noneButton?.setOnClickListener {
+                callback("none")
             }
         }
 
@@ -82,12 +82,6 @@ object ScanManager{
         this.scanResultListener = listener
     }
 
-    // Function to wait for the scanned result
-    private fun waitForScanResult() {
-        // No longer needed as the result will be provided via the listener/callback
-    }
-
-
     private fun createBarcodeScanner(): BarcodeScanner {
         val options = BarcodeScannerOptions.Builder()
             .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
@@ -110,7 +104,7 @@ object ScanManager{
         val imageAnalyzer = ImageAnalysis.Builder()
             .build()
             .also {
-                it.setAnalyzer(cameraExecutor, QRCodeAnalyzer(context))
+                it.setAnalyzer(cameraExecutor, QRCodeAnalyzer())
             }
 
         val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
@@ -125,7 +119,7 @@ object ScanManager{
 
     private var scannedResult: String? = null
 
-    private class QRCodeAnalyzer(private val context: Context) : ImageAnalysis.Analyzer {
+    private class QRCodeAnalyzer : ImageAnalysis.Analyzer {
         @OptIn(ExperimentalGetImage::class) override fun analyze(imageProxy: ImageProxy) {
             val mediaImage = imageProxy.image
             if (mediaImage != null) {
@@ -168,10 +162,6 @@ object ScanManager{
         } else {
             turnOnFlashlight()
         }
-    }
-
-    private fun scanAbsent() {
-
     }
 
     // Function to turn on the flashlight

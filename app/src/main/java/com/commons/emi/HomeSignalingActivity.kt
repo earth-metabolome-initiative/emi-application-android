@@ -12,17 +12,12 @@ class HomeSignalingActivity : BaseActivity() {
     private lateinit var recursiveButton: Button
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.activity_home_signaling// Replace with your actual login layout file
-    }
-
-    override fun setupContentFrame() {
-        TODO("Not yet implemented")
+        return R.layout.activity_home_signaling
     }
 
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home_signaling)
 
         title = "Signaling screen"
 
