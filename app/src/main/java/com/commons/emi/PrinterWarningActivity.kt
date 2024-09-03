@@ -11,6 +11,10 @@ class PrinterWarningActivity : BaseActivity() {
         return R.layout.activity_printer_warning
     }
 
+    override fun setupContentFrame() {
+        TODO("Not yet implemented")
+    }
+
     private lateinit var warningMessage: TextView
     private lateinit var confirmButton: Button
     private lateinit var cancelButton: Button

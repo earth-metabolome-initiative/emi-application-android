@@ -63,5 +63,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     //noinspection UseTomlInstead
-    implementation("com.bradyid:BradySdk:1.6.0")
+    implementation("com.bradyid:BradySdk:2.0.1")
 }

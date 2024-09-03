@@ -12,6 +12,10 @@ class HomeLabActivity : BaseActivity() {
         return R.layout.activity_home_lab // Replace with your actual login layout file
     }
 
+    override fun setupContentFrame() {
+        TODO("Not yet implemented")
+    }
+
     private lateinit var preparingButton: Button
     private lateinit var weighingButton: Button
     private lateinit var extractionButton: Button

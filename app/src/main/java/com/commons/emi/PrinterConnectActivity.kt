@@ -24,7 +24,11 @@ class PrinterConnectActivity : BaseActivity(), PrinterUpdateListener, PrinterDis
     private lateinit var adapter: PrinterListAdapter
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.activity_printer_connect // Replace with your actual login layout file
+        return R.layout.activity_printer_connect
+    }
+
+    override fun setupContentFrame() {
+        TODO("Not yet implemented")
     }
 
     @SuppressLint("MissingInflatedId")
@@ -67,7 +71,7 @@ class PrinterConnectActivity : BaseActivity(), PrinterUpdateListener, PrinterDis
                 context.applicationContext,
                 printerDiscoveryListeners
             )
-            PrinterManager.sendPrintDiscovery()
+            //PrinterManager.sendPrintDiscovery()
             PrinterManager.printerDiscovery.startBlePrinterDiscovery()
             showToast("Select a printer...")
         } catch (ex: Exception) {
@@ -107,7 +111,7 @@ class PrinterConnectActivity : BaseActivity(), PrinterUpdateListener, PrinterDis
         }
     }
 
-    fun printerRemoved(p0: DiscoveredPrinterInformation?) {
+    override fun printerRemoved(p0: DiscoveredPrinterInformation?) {
     }
 
     override fun printerDiscoveryStarted() {

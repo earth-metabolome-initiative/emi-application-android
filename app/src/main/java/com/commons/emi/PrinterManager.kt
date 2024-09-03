@@ -1,13 +1,17 @@
 package com.commons.emi
 
 import android.content.Context
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.bradysdk.api.printerconnection.PrinterDetails
+import com.bradysdk.api.printerconnection.PrinterProperties
 import com.bradysdk.api.printerconnection.PrinterUpdateListener
 import com.bradysdk.api.printerdiscovery.DiscoveredPrinterInformation
 import com.bradysdk.api.printerdiscovery.PrinterDiscovery
+import com.bradysdk.api.printerdiscovery.PrinterDiscoveryListener
+import com.bradysdk.printengine.printinginterface.PrinterDiscoveryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,7 +20,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-object PrinterManager : AppCompatActivity() {
+object PrinterManager : AppCompatActivity(), PrinterUpdateListener, PrinterDiscoveryListener {
     lateinit var printerDiscovery: PrinterDiscovery
     lateinit var printerDetails: PrinterDetails
     private var value: Int = -1
@@ -25,11 +29,15 @@ object PrinterManager : AppCompatActivity() {
     private val _isConnected = MutableLiveData<Boolean>()
     val isConnected: LiveData<Boolean> get() = _isConnected
 
-    private fun disconnectPreviousPrinter() {
-        val lastConnectedPrinter = printerDiscovery.lastConnectedPrinter
-        if (lastConnectedPrinter != null) {
-            printerDiscovery.forgetLastConnectedPrinter()
-        }
+    fun discoverPrinters(context: Context) {
+        val printerDiscoveryListeners: MutableList<PrinterDiscoveryListener> = ArrayList()
+        printerDiscoveryListeners.add(this)
+        printerDiscovery = PrinterDiscoveryFactory.getPrinterDiscovery(
+            context.applicationContext,
+            printerDiscoveryListeners
+        )
+        printerDiscovery.startBlePrinterDiscovery()
+        discoverPrinters(context)
     }
 
 
@@ -38,11 +46,7 @@ object PrinterManager : AppCompatActivity() {
         printerSelected: DiscoveredPrinterInformation,
         pul: PrinterUpdateListener,
     ): Int {
-
-        disconnectPreviousPrinter()
-
         startPrinterConnectionCheck()
-
         val r = Runnable {
             try {
 
@@ -60,9 +64,6 @@ object PrinterManager : AppCompatActivity() {
         connectThread.start()
         return value
     }
-
-    fun sendPrintDiscovery() {}
-
     private fun startPrinterConnectionCheck() {
         connectionCheckJob = CoroutineScope(Dispatchers.IO).launch {
             while (isActive) {
@@ -77,16 +78,32 @@ object PrinterManager : AppCompatActivity() {
     }
 
     private fun isPrinterReachable(): Boolean {
-        if (::printerDetails.isInitialized) {
-            if (printerDetails.printerStatusMessage == "PrinterStatus_Initialized"
-                || printerDetails.printerStatusMessage == "PrinterStatus_BatteryLow"
-            ) {
-                return true
-            }
+        return if (::printerDetails.isInitialized) {
+            (printerDetails.printerStatusMessage == "PrinterStatus_Initialized"
+                    || printerDetails.printerStatusMessage == "PrinterStatus_BatteryLow")
         } else {
             // implement an automatic reconnection procedure
-            return false
+            false
         }
-        return false
+    }
+
+    override fun PrinterUpdate(p0: MutableList<PrinterProperties>?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun printerDiscovered(p0: DiscoveredPrinterInformation?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun printerRemoved(p0: DiscoveredPrinterInformation?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun printerDiscoveryStarted() {
+        Log.d("PrinterManager", "printer discovery started")
+    }
+
+    override fun printerDiscoveryStopped() {
+        TODO("Not yet implemented")
     }
 }

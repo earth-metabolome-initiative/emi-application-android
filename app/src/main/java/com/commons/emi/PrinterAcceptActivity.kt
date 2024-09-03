@@ -15,6 +15,11 @@ class PrinterAcceptActivity : BaseActivity() {
     override fun getLayoutResourceId(): Int {
         return R.layout.activity_printer_accept
     }
+
+    override fun setupContentFrame() {
+        TODO("Not yet implemented")
+    }
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

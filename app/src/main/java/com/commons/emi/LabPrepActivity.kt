@@ -45,6 +45,11 @@ class LabPrepActivity : BaseActivity() {
     override fun getLayoutResourceId(): Int {
         return R.layout.activity_lab_prep
     }
+
+    override fun setupContentFrame() {
+        TODO("Not yet implemented")
+    }
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

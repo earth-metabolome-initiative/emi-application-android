@@ -10,6 +10,11 @@ class LabAliquotingActivity : BaseActivity() {
     override fun getLayoutResourceId(): Int {
         return R.layout.activity_lab_aliquoting // Replace with your actual login layout file
     }
+
+    override fun setupContentFrame() {
+        TODO("Not yet implemented")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

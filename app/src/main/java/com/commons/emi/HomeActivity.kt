@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 
-class HomeActivity : BaseActivity() {
+abstract class HomeActivity : BaseActivity() {
 
     private lateinit var labButton: Button
     private lateinit var logisticButton: Button
@@ -13,12 +13,17 @@ class HomeActivity : BaseActivity() {
     private lateinit var signalButton: Button
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.activity_home // Replace with your actual login layout file
+        return R.layout.activity_home
+    }
+
+    override fun setupContentFrame() {
+        layoutInflater.inflate(R.layout.activity_home, findViewById(R.id.activity_content), true)
     }
 
     // Function that is launched when class is called.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Make the link with the corresponding xml
         //setContentView(R.layout.activity_home)
 
         title = "Home screen"
@@ -39,7 +44,7 @@ class HomeActivity : BaseActivity() {
                 val intent = Intent(this, HomeLabActivity::class.java)
                 startActivity(intent)
             } else {
-                showToast("You need to accept camera permission.")
+                showToast()
             }
 
         }
@@ -50,7 +55,7 @@ class HomeActivity : BaseActivity() {
                 val intent = Intent(this, HomeLogisticActivity::class.java)
                 startActivity(intent)
             } else {
-                showToast("You need to accept camera permission.")
+                showToast()
             }
         }
 
@@ -60,7 +65,7 @@ class HomeActivity : BaseActivity() {
                 val intent = Intent(this, HomeSearchActivity::class.java)
                 startActivity(intent)
             } else {
-                showToast("You need to accept camera permission.")
+                showToast()
             }
         }
 
@@ -70,13 +75,13 @@ class HomeActivity : BaseActivity() {
                 val intent = Intent(this, HomeSignalingActivity::class.java)
                 startActivity(intent)
         } else {
-            showToast("You need to accept camera permission.")
+            showToast()
         }
         }
     }
 
     // Function to easily display toasts.
-    private fun showToast(toast: String?) {
-        runOnUiThread { Toast.makeText(this, toast, Toast.LENGTH_LONG).show() }
+    private fun showToast() {
+        runOnUiThread { Toast.makeText(this, "You need to accept camera permission.", Toast.LENGTH_LONG).show() }
     }
 }

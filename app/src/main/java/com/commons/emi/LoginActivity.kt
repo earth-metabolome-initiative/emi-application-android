@@ -20,7 +20,6 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
-
 class LoginActivity : BaseActivity() {
 
     // Initialize UI elements
@@ -35,7 +34,11 @@ class LoginActivity : BaseActivity() {
     private lateinit var buttonLogin: Button
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.activity_login // Replace with your actual login layout file
+        return R.layout.activity_login
+    }
+
+    override fun setupContentFrame() {
+        layoutInflater.inflate(R.layout.activity_login, findViewById(R.id.activity_content), true)
     }
 
     @SuppressLint("SetTextI18n")
@@ -45,7 +48,7 @@ class LoginActivity : BaseActivity() {
         // Make the link with the corresponding xml
         //setContentView(R.layout.activity_login)
 
-        title = "Directus connection screen"
+        title = "Connection screen"
 
         getLatestReleaseVersion()
     }
