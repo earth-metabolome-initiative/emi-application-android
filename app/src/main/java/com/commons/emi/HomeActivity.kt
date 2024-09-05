@@ -34,8 +34,7 @@ class HomeActivity : BaseActivity() {
 
         // Set up button click listeners here
         labButton.setOnClickListener {
-            val cameraPermission = PermissionsManager.checkCameraPermission(this)
-            if (cameraPermission) {
+            if (checkCameraPermission()) {
                 val intent = Intent(this, HomeLabActivity::class.java)
                 startActivity(intent)
             } else {
@@ -45,8 +44,7 @@ class HomeActivity : BaseActivity() {
         }
 
         logisticButton.setOnClickListener {
-            val cameraPermission = PermissionsManager.checkCameraPermission(this)
-            if (cameraPermission) {
+            if (checkCameraPermission()) {
                 val intent = Intent(this, HomeLogisticActivity::class.java)
                 startActivity(intent)
             } else {
@@ -55,8 +53,7 @@ class HomeActivity : BaseActivity() {
         }
 
         searchButton.setOnClickListener {
-            val cameraPermission = PermissionsManager.checkCameraPermission(this)
-            if (cameraPermission) {
+            if (checkCameraPermission()) {
                 val intent = Intent(this, HomeSearchActivity::class.java)
                 startActivity(intent)
             } else {
@@ -65,8 +62,7 @@ class HomeActivity : BaseActivity() {
         }
 
         signalButton.setOnClickListener {
-            val cameraPermission = PermissionsManager.checkCameraPermission(this)
-            if (cameraPermission) {
+            if (checkCameraPermission()) {
                 val intent = Intent(this, HomeSignalingActivity::class.java)
                 startActivity(intent)
             } else {
@@ -75,8 +71,12 @@ class HomeActivity : BaseActivity() {
         }
     }
 
+    private fun checkCameraPermission(): Boolean {
+        return PermissionsManager.checkCameraPermission(this)
+    }
+
     // Function to easily display toasts.
     private fun showToast() {
-        runOnUiThread { Toast.makeText(this, "You need to accept camera permission.", Toast.LENGTH_LONG).show() }
+        runOnUiThread { Toast.makeText(this, "You need to accept camera permission to use the application.", Toast.LENGTH_LONG).show() }
     }
 }

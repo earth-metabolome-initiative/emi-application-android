@@ -53,7 +53,7 @@ object ScanManager{
         if (noneButton != null) {
             this.noneButton = noneButton
             this.noneButton?.setOnClickListener {
-                callback("none")
+                callback("None")
             }
         }
 

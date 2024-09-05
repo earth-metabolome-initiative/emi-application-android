@@ -1,9 +1,13 @@
-<!-- res/menu/drawer_menu.xml -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Main menu with submenu -->
     <item
         android:id="@+id/nav_db"
         android:icon="@drawable/ic_db"
-        android:title="Directus settings" >
+        android:title="Directus settings"
+        android:checkableBehavior="single">
+
+        <!-- Submenu -->
         <menu>
             <item
                 android:id="@+id/nav_db_option1"
@@ -13,6 +17,8 @@
                 android:title="Option 2" />
         </menu>
     </item>
+
+    <!-- Other main menus -->
     <item
         android:id="@+id/nav_printer"
         android:icon="@drawable/ic_printer"

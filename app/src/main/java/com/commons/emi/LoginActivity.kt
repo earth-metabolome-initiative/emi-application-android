@@ -4,14 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import com.bradysdk.api.printerconnection.PrinterProperties
-import com.bradysdk.api.printerdiscovery.DiscoveredPrinterInformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -194,5 +191,4 @@ class LoginActivity : BaseActivity() {
     private fun showToast(toast: String?) {
         runOnUiThread { Toast.makeText(this, toast, Toast.LENGTH_SHORT).show() }
     }
-
 }

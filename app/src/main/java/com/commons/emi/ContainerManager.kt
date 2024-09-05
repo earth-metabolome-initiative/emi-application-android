@@ -14,8 +14,13 @@ object ContainerManager {
     suspend fun checkContainer(container: String): Int = withContext(Dispatchers.IO) {
         try {
             val result: Int
-            val collectionUrl =
+
+            // support old container names to avoid changing all labels
+            val collectionUrl = if (container.matches(Regex("^container_\\dx\\d_\\d{6}\$")) || container == "absent") {
+                "${DirectusTokenManager.getInstance()}/items/Containers?filter[old_id][_eq]=$container&&limit=1"
+            } else {
                 "${DirectusTokenManager.getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
+            }
             Log.d("ContainerManager", "url: $collectionUrl")
 
             val client = OkHttpClient()

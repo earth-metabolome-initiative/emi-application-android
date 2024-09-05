@@ -2,10 +2,8 @@ package com.commons.emi
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import android.widget.Button
 
-@Suppress("DEPRECATION")
 class HomeLabActivity : BaseActivity() {
 
     override fun getLayoutResourceId(): Int {
@@ -23,12 +21,6 @@ class HomeLabActivity : BaseActivity() {
 
         title = "Lab screen"
 
-        PermissionsManager.enableBluetoothAndLocation(this)
-
-        // Add the back arrow to this screen
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back_arrow)
-
         preparingButton = findViewById(R.id.preparingButton)
         weighingButton = findViewById(R.id.weighingButton)
         extractionButton = findViewById(R.id.extractionButton)
@@ -41,31 +33,18 @@ class HomeLabActivity : BaseActivity() {
         }
 
         weighingButton.setOnClickListener {
-            //val intent = Intent(this, PrinterAcceptActivity::class.java)
-            intent.putExtra("ACTIVITY", "LabWeighingActivity")
+            val intent = Intent(this, LabWeighingActivity::class.java)
             startActivity(intent)
         }
 
         extractionButton.setOnClickListener {
-            //val intent = Intent(this, PrinterAcceptActivity::class.java)
-            intent.putExtra("ACTIVITY", "LabExtractionActivity")
+            val intent = Intent(this, LabExtractionActivity::class.java)
             startActivity(intent)
         }
 
         aliquotingButton.setOnClickListener {
-            //val intent = Intent(this, PrinterAcceptActivity::class.java)
-            intent.putExtra("ACTIVITY", "LabAliquotingActivity")
+            val intent = Intent(this, LabAliquotingActivity::class.java)
             startActivity(intent)
         }
-    }
-
-    // Connect the back arrow to the action to go back to home page
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressed()
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 }

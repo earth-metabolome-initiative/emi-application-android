@@ -43,7 +43,6 @@ class LabPrepActivity : BaseActivity() {
         return R.layout.activity_lab_prep
     }
 
-
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,7 +89,7 @@ class LabPrepActivity : BaseActivity() {
             }
         }
 
-        // Set up button click listener for falcon QR Scanner
+        // Set up button click listener for sample's QR Scanner
         scanButtonSample.setOnClickListener {
             isContainerScanActive = false
             isObjectScanActive = true
@@ -119,77 +118,18 @@ class LabPrepActivity : BaseActivity() {
 
     }
 
-    // Function to store the scanned data.
-    @SuppressLint("SetTextI18n")
-    fun manageScan() {
-
-        // Counts the spaces left in the rack
-        CoroutineScope(Dispatchers.IO).launch {
-            withContext(Dispatchers.Main) {
-                if (isContainerScanActive) {
-                    val places =
-                        ContainerManager.checkContainer(scanButtonContainer.text.toString())
-                    if (places > 0) {
-                        textSample.visibility = View.VISIBLE
-                        scanButtonSample.visibility = View.VISIBLE
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.setTextColor(Color.GRAY)
-                        emptyPlace.text =
-                            "This container should still contain $places empty places"
-                    } else if (places == 0) {
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.text = "This container is full, please scan another one"
-                        scanButtonContainer.text = "Value"
-                        scanButtonSample.visibility = View.INVISIBLE
-                        textSample.visibility = View.INVISIBLE
-                        emptyPlace.setTextColor(Color.RED)
-                    } else if (places == -1) {
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.text = "You are trying to scan a sample tube, please scan a valid container."
-                        scanButtonSample.visibility = View.INVISIBLE
-                        textSample.visibility = View.INVISIBLE
-                        emptyPlace.setTextColor(Color.RED)
-                    } else if (places == -3) {
-                        textSample.visibility = View.VISIBLE
-                        scanButtonSample.visibility = View.VISIBLE
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.setTextColor(Color.GRAY)
-                        emptyPlace.text =
-                            "This container is not determined as finite."
-                    } else if (places == -4) {
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.text = "Invalid container, please scan a valid one."
-                        scanButtonSample.visibility = View.INVISIBLE
-                        textSample.visibility = View.INVISIBLE
-                        emptyPlace.setTextColor(Color.RED)
-                    }else {
-                        showToast("places: $places")
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.text = "Unknown error, please restart the application."
-                        scanButtonContainer.visibility = View.INVISIBLE
-                        scanButtonSample.visibility = View.INVISIBLE
-                        textSample.visibility = View.INVISIBLE
-                        emptyPlace.setTextColor(Color.RED)
-                    }
-                } else if (isObjectScanActive) {
-                    val containerId = scanButtonContainer.text.toString()
-                    val sampleId = scanButtonSample.text.toString()
-                    val containerModel = ContainerManager.getContainerModel(containerId)
-                    val sampleModel = ContainerManager.getContainerModel(sampleId)
-                    val isPairLegal = ContainerManager.checkContainerHierarchy(containerModel, sampleModel)
-                    if (isPairLegal) {
-                        val sampleKey = ContainerManager.getPrimaryKey(sampleId)
-                        val containerKey = ContainerManager.getPrimaryKey(containerId)
-                        withContext(Dispatchers.IO) {
-                            sendDataToDirectus(sampleKey, containerKey)
-                        }
-                    } else {
-                            emptyPlace.visibility = View.VISIBLE
-                            emptyPlace.setTextColor(Color.RED)
-                            emptyPlace.text = "Invalid pair. You are not allowed to put this child container in this parent container."
-                        }
+    private fun manageScan() {
+        if (isContainerScanActive) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val places = ContainerManager.checkContainer(scanButtonContainer.text.toString())
+                withContext(Dispatchers.Main) {
+                    handleContainerScan(places)
                 }
             }
+        } else if (isObjectScanActive) {
+            val containerId = scanButtonContainer.text.toString()
+            val sampleId = scanButtonSample.text.toString()
+            handleObjectScan(containerId, sampleId)
         }
     }
 
@@ -197,7 +137,8 @@ class LabPrepActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     private suspend fun sendDataToDirectus(
         sampleKey: Int,
-        containerKey: Int
+        containerKey: Int,
+        sampleId: String
     ) {
         // Perform the POST request to add the values on directus
         try {
@@ -227,49 +168,117 @@ class LabPrepActivity : BaseActivity() {
             val responseCode = response.code
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 // Display a Toast with the response message
-                showToast("Data correctly added to database")
+                showToast("$sampleId correctly added to database")
 
-                // Check if there is still enough place in the rack before initiating the QR code reader
-                withContext(Dispatchers.Main) {
-                    val places =
-                        ContainerManager.checkContainer(scanButtonContainer.text.toString())
-                    if (places > 0) {
-                        // Automatically launch the QR scanning when last sample correctly added to the database
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.text = "This rack should still contain $places empty places"
-                        delay(500)
-                        scanButtonSample.performClick()
-                    } else if (places == -1) {
-                        // Automatically launch the QR scanning when last sample correctly added to the database
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.text = "This container is not determined as finite."
-                        delay(500)
-                        scanButtonSample.performClick()
-                    } else if (places == 0) {
-                        emptyPlace.text = "Container is full, scan another one to continue"
-                        scanButtonContainer.text = "scan another container"
-                        scanButtonSample.text = "Begin to scan samples"
-                        textSample.visibility = View.INVISIBLE
-                        scanButtonSample.visibility = View.INVISIBLE
-
-                    } else {
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.text = "Unknown error, please restart the application."
-                        scanButtonContainer.visibility = View.INVISIBLE
-                        scanButtonSample.visibility = View.INVISIBLE
-                        emptyPlace.setTextColor(Color.RED)
-                    }
+                // Check if there is still enough place in the container before initiating the QR code reader
+                val places =
+                    ContainerManager.checkContainer(scanButtonContainer.text.toString())
+                handleContainerScan(places)
+                if (places > 0) {
+                    delay(500)
+                    scanButtonSample.performClick()
                 }
             } else {
                 withContext(Dispatchers.Main) {
                     emptyPlace.visibility = View.VISIBLE
                     emptyPlace.text =
-                        "Data already added to database. If you want to move it to another container, please use the move stuff mode."
+                        "$sampleId already added to database. If you want to move it to another container, please use the move stuff mode."
                 }
             }
         } catch (e: IOException) {
             showToast("Error: $e")
             }
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun updateUIForValidContainer(places: Int) {
+        textSample.visibility = View.VISIBLE
+        scanButtonSample.visibility = View.VISIBLE
+        emptyPlace.visibility = View.VISIBLE
+        emptyPlace.setTextColor(Color.GRAY)
+        emptyPlace.text = "This container should still contain $places empty places"
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun updateUIForFullContainer() {
+        emptyPlace.visibility = View.VISIBLE
+        emptyPlace.text = "This container is full, please scan another one"
+        scanButtonContainer.text = "Value"
+        scanButtonSample.visibility = View.INVISIBLE
+        textSample.visibility = View.INVISIBLE
+        emptyPlace.setTextColor(Color.RED)
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun updateUIForSampleTubeError() {
+        emptyPlace.visibility = View.VISIBLE
+        emptyPlace.text = "You are trying to scan a sample tube, please scan a valid container."
+        scanButtonSample.visibility = View.INVISIBLE
+        textSample.visibility = View.INVISIBLE
+        emptyPlace.setTextColor(Color.RED)
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun updateUIForIndeterminateContainer() {
+        textSample.visibility = View.VISIBLE
+        scanButtonSample.visibility = View.VISIBLE
+        emptyPlace.visibility = View.VISIBLE
+        emptyPlace.setTextColor(Color.GRAY)
+        emptyPlace.text = "This container is not determined as finite."
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun updateUIForInvalidContainer() {
+        emptyPlace.visibility = View.VISIBLE
+        emptyPlace.text = "Invalid container, please scan a valid one."
+        scanButtonSample.visibility = View.INVISIBLE
+        textSample.visibility = View.INVISIBLE
+        emptyPlace.setTextColor(Color.RED)
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun updateUIForUnknownError(places: Int) {
+        showToast("places: $places")
+        emptyPlace.visibility = View.VISIBLE
+        emptyPlace.text = "Unknown error, please restart the application."
+        scanButtonContainer.visibility = View.INVISIBLE
+        scanButtonSample.visibility = View.INVISIBLE
+        textSample.visibility = View.INVISIBLE
+        emptyPlace.setTextColor(Color.RED)
+    }
+
+    private fun handleContainerScan(places: Int) {
+        when (places) {
+            in 1..Int.MAX_VALUE -> updateUIForValidContainer(places)
+            0 -> updateUIForFullContainer()
+            -1 -> updateUIForSampleTubeError()
+            -3 -> updateUIForIndeterminateContainer()
+            -4 -> updateUIForInvalidContainer()
+            else -> updateUIForUnknownError(places)
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun handleObjectScan(containerId: String, sampleId: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val containerModel = ContainerManager.getContainerModel(containerId)
+            val sampleModel = ContainerManager.getContainerModel(sampleId)
+            val isPairLegal = ContainerManager.checkContainerHierarchy(containerModel, sampleModel)
+            if (isPairLegal) {
+                val sampleKey = ContainerManager.getPrimaryKey(sampleId)
+                val containerKey = ContainerManager.getPrimaryKey(containerId)
+                withContext(Dispatchers.IO) {
+                    sendDataToDirectus(sampleKey, containerKey, sampleId)
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    emptyPlace.visibility = View.VISIBLE
+                    emptyPlace.setTextColor(Color.RED)
+                    emptyPlace.text =
+                        "Invalid pair. You are not allowed to put this child container in this parent container."
+                }
+            }
+        }
     }
 
     // Function to easily display toasts.

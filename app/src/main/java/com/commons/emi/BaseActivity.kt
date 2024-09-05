@@ -15,8 +15,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 
 abstract class BaseActivity : AppCompatActivity() {
     // Status icons elements
@@ -52,10 +50,6 @@ abstract class BaseActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
-
-        //if (savedInstanceState == null) {
-            //setupContentFrame()
-        //}
 
         // Observe connection status changes
         DirectusTokenManager.isConnected.observe(this) { isConnected ->
@@ -171,6 +165,4 @@ abstract class BaseActivity : AppCompatActivity() {
     private fun showToast(toast: String?) {
         runOnUiThread { Toast.makeText(this, toast, Toast.LENGTH_SHORT).show() }
     }
-
-    //protected abstract fun setupContentFrame()
 }
