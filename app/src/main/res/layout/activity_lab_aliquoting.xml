@@ -1,10 +1,187 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="16dp"
+    xmlns:tools="http://schemas.android.com/tools"
     tools:context=".LabAliquotingActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Main Content Layout (Other Elements) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="visible"
+        tools:ignore="UselessParent">
+
+        <LinearLayout
+            android:id="@+id/volumeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:gravity="center_horizontal"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/aliquotVolumeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enter aliquot's volume and unit"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:visibility="visible"
+                tools:ignore="HardcodedText" />
+
+                <!-- Horizontal LinearLayout to align EditText and Spinner side by side -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp">
+
+                    <!-- Solvent Volume EditText -->
+                    <EditText
+                        android:id="@+id/aliquotVolume"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="volume"
+                        android:inputType="numberDecimal"
+                        android:minHeight="48dp"
+                        android:visibility="visible"
+                        android:layout_marginEnd="8dp"
+                        android:autofillHints="1500"
+                        tools:ignore="HardcodedText" />
+
+                    <!-- Unit Spinner -->
+                    <Spinner
+                        android:id="@+id/unitSpinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:visibility="visible" />
+
+                </LinearLayout>
+        </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/containerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/scanButtonContainerLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scan the box's QR code"
+            android:visibility="visible"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/scanButtonContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:text="Value"
+            android:layout_marginTop="16dp"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/containerEmptyPlace"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:visibility="visible"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="15dp"
+            tools:ignore="HardcodedText,MissingConstraints" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/aliquotLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/scanButtonAliquotLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:visibility="visible"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="15dp"
+            tools:ignore="HardcodedText,MissingConstraints" />
+
+        <Button
+            android:id="@+id/scanButtonAliquot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Begin to scan extracts"
+            android:visibility="visible"
+            android:layout_marginTop="16dp"
+            tools:ignore="HardcodedText,MissingConstraints" />
+    </LinearLayout>
+
+    <!-- QR Scanner Layout: Positioned above other content, as a square in the center -->
+    <LinearLayout
+        android:id="@+id/scanLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"> <!-- Initially hidden -->
+
+        <!-- Camera Preview for QR Scanning (set size to a square) -->
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_gravity="center"
+            android:background="#DDDDDD"
+            android:visibility="visible" />
+
+        <!-- Flashlight Button -->
+        <Button
+            android:id="@+id/flashlightButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Toggle Flashlight"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center"
+            android:visibility="visible"
+            tools:ignore="HardcodedText" />
+
+        <!-- Scan Status Text -->
+        <TextView
+            android:id="@+id/scanStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="18sp"
+            android:visibility="visible"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

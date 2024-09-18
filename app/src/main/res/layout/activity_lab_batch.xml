@@ -8,42 +8,44 @@
     android:padding="16dp"
     android:weightSum="1">
 
-    <Button
-        android:id="@+id/labButton"
+    <TextView
+        android:id="@+id/batchText"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.25"
-        android:text="Laboratory"
+        android:text=""
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/driedBatchButton"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:text="Create samples batch"
         android:textSize="40sp"
         android:layout_marginBottom="8dp"
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/logisticButton"
+        android:id="@+id/extractionBatchButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.25"
-        android:text="Logistic"
+        android:text="Create extraction batch"
         android:textSize="40sp"
         android:layout_marginBottom="8dp"
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/searchButton"
+        android:id="@+id/aliquotBatchButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.25"
-        android:text="Navigation"
-        android:textSize="40sp"
-        android:layout_marginBottom="8dp"
-        tools:ignore="HardcodedText" />
-
-    <Button
-        android:id="@+id/signalButton"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.25"
-        android:text="Reporting"
+        android:text="Create aliquots batch"
         android:textSize="40sp"
         android:layout_marginBottom="16dp"
         tools:ignore="HardcodedText" />

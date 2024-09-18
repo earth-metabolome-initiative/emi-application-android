@@ -1,106 +1,147 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp"
-    android:gravity="center"
-    tools:context=".LoginActivity">
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/baseUrlTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Directus URL"
-        android:visibility="invisible"
-        android:layout_marginBottom="4dp"
-        tools:ignore="HardcodedText" />
-
-    <EditText
-        android:id="@+id/baseUrlEditText"
+    <!-- Top section (baseUrlTextView and baseUrlEditText) -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:hint="Enter your instance URL"
-        android:text="https://emi-collection.unifr.ch/directus"
-        android:visibility="invisible"
-        android:gravity="center_horizontal"
-        android:minHeight="48dp"
-        tools:ignore="HardcodedText,TextFields,VisualLintTextFieldSize"
-        android:autofillHints="" />
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/welcomeMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Welcome to EMI application!"
-        android:visibility="invisible"
-        android:textSize="25sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"
-        tools:ignore="HardcodedText" />
+        <TextView
+            android:id="@+id/baseUrlTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Directus URL"
+            android:gravity="center"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:layout_marginBottom="4dp"
+            tools:ignore="HardcodedText" />
 
-    <TextView
-        android:id="@+id/LoginMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Please enter your Directus credentials"
-        android:visibility="invisible"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"
-        tools:ignore="HardcodedText" />
+        <EditText
+            android:id="@+id/baseUrlEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:hint="Enter your instance URL"
+            android:text="https://emi-collection.unifr.ch/directus"
+            android:gravity="center"
+            android:minHeight="40dp"
+            android:visibility="gone"
+            tools:ignore="HardcodedText,TextFields,VisualLintTextFieldSize"
+            android:autofillHints="" />
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/usernameTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Username"
-        android:visibility="invisible"
-        android:layout_marginBottom="4dp"
-        tools:ignore="HardcodedText" />
-
-    <EditText
-        android:id="@+id/usernameEditText"
+    <!-- The remaining space containing the ScrollView centered -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:hint="Enter your username"
-        android:visibility="invisible"
-        android:gravity="center_horizontal"
-        android:minHeight="48dp"
-        tools:ignore="HardcodedText,TextFields,VisualLintTextFieldSize"
-        android:autofillHints="" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
 
-    <TextView
-        android:id="@+id/passwordTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Password"
-        android:visibility="invisible"
-        android:layout_marginBottom="4dp"
-        tools:ignore="HardcodedText" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            tools:ignore="UselessParent">
 
-    <EditText
-        android:id="@+id/passwordEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:hint="Enter your password"
-        android:visibility="invisible"
-        android:gravity="center_horizontal"
-        android:inputType="textPassword"
-        android:minHeight="48dp"
-        tools:ignore="HardcodedText,VisualLintTextFieldSize"
-        android:autofillHints="" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
 
-    <Button
-        android:id="@+id/loginButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:text="Login"
-        android:textSize="18sp"
-        tools:ignore="HardcodedText" />
+                <TextView
+                    android:id="@+id/welcomeMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome to EMI application!"
+                    android:visibility="gone"
+                    android:gravity="center"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/LoginMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Please enter your Directus credentials"
+                    android:visibility="gone"
+                    android:gravity="center"
+                    android:textSize="25sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="40dp"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/usernameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Username"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:layout_marginBottom="4dp"
+                    tools:ignore="HardcodedText" />
+
+                <EditText
+                    android:id="@+id/usernameEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:hint="Enter your username"
+                    android:visibility="gone"
+                    android:gravity="center_horizontal"
+                    android:textSize="30sp"
+                    android:minHeight="40dp"
+                    tools:ignore="HardcodedText,TextFields,VisualLintTextFieldSize"
+                    android:autofillHints="" />
+
+                <TextView
+                    android:id="@+id/passwordTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    android:text="Password"
+                    android:visibility="gone"
+                    android:layout_marginBottom="4dp"
+                    tools:ignore="HardcodedText" />
+
+                <EditText
+                    android:id="@+id/passwordEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:hint="Enter your password"
+                    android:visibility="gone"
+                    android:gravity="center_horizontal"
+                    android:inputType="textPassword"
+                    android:textSize="30sp"
+                    android:minHeight="40dp"
+                    tools:ignore="HardcodedText,VisualLintTextFieldSize"
+                    android:autofillHints="" />
+
+                <Button
+                    android:id="@+id/loginButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:visibility="gone"
+                    android:text="Login"
+                    android:textSize="40sp"
+                    tools:ignore="HardcodedText" />
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 
 </LinearLayout>

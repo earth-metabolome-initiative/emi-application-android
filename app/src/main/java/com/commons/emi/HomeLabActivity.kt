@@ -10,6 +10,7 @@ class HomeLabActivity : BaseActivity() {
         return R.layout.activity_home_lab
     }
 
+    private lateinit var batchButton: Button
     private lateinit var preparingButton: Button
     private lateinit var weighingButton: Button
     private lateinit var extractionButton: Button
@@ -21,10 +22,17 @@ class HomeLabActivity : BaseActivity() {
 
         title = "Lab screen"
 
+        batchButton = findViewById(R.id.batchButton)
         preparingButton = findViewById(R.id.preparingButton)
         weighingButton = findViewById(R.id.weighingButton)
         extractionButton = findViewById(R.id.extractionButton)
         aliquotingButton = findViewById(R.id.aliquotingButton)
+
+        // Set up button click listeners here
+        batchButton.setOnClickListener {
+            val intent = Intent(this, LabBatchActivity::class.java)
+            startActivity(intent)
+        }
 
         // Set up button click listeners here
         preparingButton.setOnClickListener {

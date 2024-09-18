@@ -1,0 +1,83 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:weightSum="1">
+
+    <!-- LinearLayout for Date and Time side by side -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <Button
+            android:id="@+id/batchButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.33"
+            android:text="Batches"
+            android:textSize="25sp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            tools:ignore="ButtonStyle,HardcodedText,NestedWeights" />
+
+        <Button
+            android:id="@+id/preparingButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.33"
+            android:text="Preparation"
+            android:textSize="25sp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            tools:ignore="ButtonStyle,HardcodedText,NestedWeights" />
+
+        <Button
+            android:id="@+id/weighingButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.33"
+            android:text="Weighing"
+            android:textSize="25sp"
+            android:layout_marginBottom="8dp"
+            tools:ignore="ButtonStyle,HardcodedText" />
+    </LinearLayout>
+
+    <!-- LinearLayout for Buttons side by side -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/extractionButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:text="Extraction"
+            android:textSize="25sp"
+            android:layout_marginStart="100dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            tools:ignore="ButtonStyle,HardcodedText,NestedWeights" />
+
+        <Button
+            android:id="@+id/aliquotingButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:text="Aliquoting"
+            android:textSize="25sp"
+            android:layout_marginEnd="100dp"
+            android:layout_marginBottom="16dp"
+            tools:ignore="ButtonStyle,HardcodedText" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -44,7 +44,13 @@ class LoginActivity : BaseActivity() {
 
         title = "Connection screen"
 
-        getLatestReleaseVersion()
+        val launchedFromDrawer = intent.getStringExtra("LAUNCHED")
+
+        if (launchedFromDrawer == "yes") {
+                performNewConnection()
+            } else {
+            getLatestReleaseVersion()
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -107,6 +113,7 @@ class LoginActivity : BaseActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun performConnection() {
+        checkDBConnection()
         // Retrieve UI elements from xml to perform action on them
         textViewBaseUrl = findViewById(R.id.baseUrlTextView)
         editTextBaseUrl = findViewById(R.id.baseUrlEditText)
@@ -143,9 +150,9 @@ class LoginActivity : BaseActivity() {
             // Perform login in a coroutine to keep it asynchronous
             CoroutineScope(Dispatchers.Main).launch {
                 val accessToken = withContext(Dispatchers.IO) {
-                    DirectusTokenManager.initialize(baseUrl, username, password)
-                    delay(2000)
-                    DirectusTokenManager.getAccessToken()
+                    DatabaseManager.initialize(baseUrl, username, password)
+                    delay(1500)
+                    DatabaseManager.getAccessToken()
                 }
 
                 if (accessToken != null) {
@@ -153,6 +160,57 @@ class LoginActivity : BaseActivity() {
                     // Successful login, proceed to the next activity
                     val intent = Intent(this@LoginActivity, HomeActivity::class.java)
                     startActivity(intent)
+                    finish()
+                } else {
+                    // Login failed, show an error message
+                    showToast("Login failed. Please check your credentials.")
+                }
+            }
+        }
+    }
+
+    private fun performNewConnection() {
+        // Retrieve UI elements from xml to perform action on them
+        textViewBaseUrl = findViewById(R.id.baseUrlTextView)
+        editTextBaseUrl = findViewById(R.id.baseUrlEditText)
+        loginMessage = findViewById(R.id.LoginMessage)
+        textViewUsername = findViewById(R.id.usernameTextView)
+        editTextUsername = findViewById(R.id.usernameEditText)
+        textViewPassword = findViewById(R.id.passwordTextView)
+        editTextPassword = findViewById(R.id.passwordEditText)
+        buttonLogin = findViewById(R.id.loginButton)
+
+        // Change welcome text and login button to ask user to download the new version
+        textViewBaseUrl.visibility = View.VISIBLE
+        editTextBaseUrl.visibility = View.VISIBLE
+        loginMessage.visibility = View.VISIBLE
+        textViewUsername.visibility = View.VISIBLE
+        editTextUsername.visibility = View.VISIBLE
+        textViewPassword.visibility = View.VISIBLE
+        editTextPassword.visibility = View.VISIBLE
+        buttonLogin.visibility = View.VISIBLE
+
+        // Define actions that are performed when user click on login button
+        buttonLogin.setOnClickListener {
+
+            // display a message to inform user that the connection is in progress
+            showToast("Reconnecting...")
+
+            // Retrieve username and password entered by the user
+            val baseUrl = editTextBaseUrl.text.toString()
+            val username = editTextUsername.text.toString()
+            val password = editTextPassword.text.toString()
+
+            // Perform login in a coroutine to keep it asynchronous
+            CoroutineScope(Dispatchers.Main).launch {
+                val accessToken = withContext(Dispatchers.IO) {
+                    DatabaseManager.initialize(baseUrl, username, password)
+                    delay(1500)
+                    DatabaseManager.getAccessToken()
+                }
+
+                if (accessToken != null) {
+                    showToast("Reconnected!")
                     finish()
                 } else {
                     // Login failed, show an error message

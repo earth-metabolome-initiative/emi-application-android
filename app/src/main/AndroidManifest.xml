@@ -24,13 +24,7 @@
         android:theme="@style/Theme.EMI"
         tools:targetApi="31">
         <activity
-            android:name=".PrinterConnectActivity"
-            android:exported="false" />
-        <activity
-            android:name=".PrinterWarningActivity"
-            android:exported="false" />
-        <activity
-            android:name=".PrinterAcceptActivity"
+            android:name=".LabBatchActivity"
             android:exported="false" />
         <activity
             android:name=".SignalingRecursiveActivity"
@@ -82,11 +76,9 @@
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

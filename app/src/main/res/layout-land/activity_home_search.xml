@@ -1,0 +1,60 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:weightSum="1">
+
+    <!-- LinearLayout for Date and Time side by side -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <Button
+            android:id="@+id/sampleButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:text="Find specific sample"
+            android:textSize="30sp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            tools:ignore="ButtonStyle,HardcodedText,NestedWeights" />
+
+        <Button
+            android:id="@+id/rangeButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:text="Find a range of samples"
+            android:textSize="30sp"
+            android:layout_marginBottom="8dp"
+            tools:ignore="ButtonStyle,HardcodedText" />
+    </LinearLayout>
+
+    <!-- LinearLayout for Buttons side by side -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/speciesButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Find specific species"
+            android:textSize="30sp"
+            android:layout_marginStart="160dp"
+            android:layout_marginEnd="160dp"
+            android:layout_marginBottom="16dp"
+            tools:ignore="ButtonStyle,HardcodedText,NestedWeights" />
+    </LinearLayout>
+
+</LinearLayout>

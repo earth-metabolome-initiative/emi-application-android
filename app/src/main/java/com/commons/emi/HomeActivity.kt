@@ -8,6 +8,7 @@ import android.widget.Toast
 
 class HomeActivity : BaseActivity() {
 
+    private lateinit var connectPrinterButton: Button
     private lateinit var labButton: Button
     private lateinit var logisticButton: Button
     private lateinit var searchButton: Button
@@ -30,7 +31,6 @@ class HomeActivity : BaseActivity() {
         logisticButton = findViewById(R.id.logisticButton)
         searchButton = findViewById(R.id.searchButton)
         signalButton = findViewById(R.id.signalButton)
-
 
         // Set up button click listeners here
         labButton.setOnClickListener {

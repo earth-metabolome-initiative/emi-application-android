@@ -1,10 +1,293 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="16dp"
+    xmlns:tools="http://schemas.android.com/tools"
     tools:context=".LabExtractionActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Main Content Layout (Other Elements) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="visible"
+        tools:ignore="UselessParent">
+
+    <!-- Horizontal LinearLayout to contain EditText and Spinner side by side -->
+    <LinearLayout
+        android:id="@+id/methodLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:gravity="center_horizontal"
+        android:visibility="visible">
+
+    <!-- Extraction Method Label -->
+    <TextView
+        android:id="@+id/extractionMethodLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Extraction method:"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        android:layout_marginTop="16dp"
+        tools:ignore="HardcodedText" />
+
+    <!-- New Extraction Method Label -->
+    <TextView
+        android:id="@+id/newExtractionMethodLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No suitable referenced method? Add it by following this link."
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:visibility="visible"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        tools:ignore="HardcodedText" />
+
+    <!-- Spinner for Extraction Method -->
+    <Spinner
+        android:id="@+id/extractionMethodSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:layout_marginTop="8dp"
+        android:minHeight="48dp" />
+
+    <!-- Extraction Method Description -->
+    <TextView
+        android:id="@+id/extractionMethodDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:visibility="visible" />
+
+    </LinearLayout>
+
+    <!-- Parent Vertical LinearLayout to keep the label at the top and other elements side by side -->
+    <LinearLayout
+        android:id="@+id/volumeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+    <!-- Solvent Volume Label at the top -->
+    <TextView
+        android:id="@+id/solventVolumeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter solvent volume and unit"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:visibility="visible"
+        tools:ignore="HardcodedText" />
+
+    <!-- Horizontal LinearLayout to align EditText and Spinner side by side -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <!-- Solvent Volume EditText -->
+        <EditText
+            android:id="@+id/solventVolume"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="volume"
+            android:inputType="numberDecimal"
+            android:minHeight="48dp"
+            android:visibility="visible"
+            android:layout_marginEnd="8dp"
+            android:autofillHints="1500"
+            tools:ignore="HardcodedText" />
+
+        <!-- Unit Spinner -->
+        <Spinner
+            android:id="@+id/unitSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="32dp"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+</LinearLayout>
+
+
+    <!-- Horizontal LinearLayout to contain EditText and Spinner side by side -->
+    <LinearLayout
+        android:id="@+id/batchLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <!-- Scan Solvent QR Code Label -->
+        <TextView
+            android:id="@+id/scanButtonBatchLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scan solvent's QR code"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:visibility="visible"
+            tools:ignore="HardcodedText" />
+
+        <!-- Scan Solvent Button -->
+        <Button
+            android:id="@+id/scanButtonBatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scan"
+            android:layout_marginTop="16dp"
+            android:visibility="visible"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
+
+    <!-- Horizontal LinearLayout to contain EditText and Spinner side by side -->
+    <LinearLayout
+        android:id="@+id/containerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+    <!-- Scan Container QR Code Label -->
+    <TextView
+        android:id="@+id/scanButtonContainerLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan container's QR code"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:visibility="visible"
+        tools:ignore="HardcodedText" />
+
+    <!-- Scan Container Button -->
+    <Button
+        android:id="@+id/scanButtonContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan"
+        android:layout_marginTop="16dp"
+        android:visibility="visible"
+        tools:ignore="HardcodedText" />
+
+    <!-- Empty Place for Scanned Container Info -->
+    <TextView
+        android:id="@+id/containerEmptyPlace"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="16dp"
+        android:visibility="visible" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/extractLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:visibility="visible">
+
+    <!-- Scan Extract QR Code Label -->
+    <TextView
+        android:id="@+id/scanButtonExtractLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan extract's QR code"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        tools:ignore="HardcodedText" />
+
+    <!-- Scan Extract Button -->
+    <Button
+        android:id="@+id/scanButtonExtract"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan"
+        android:layout_marginTop="16dp"
+        android:visibility="visible"
+        tools:ignore="HardcodedText" />
+
+    </LinearLayout>
+
+        <!-- QR Scanner Layout: Positioned above other content, as a square in the center -->
+        <LinearLayout
+            android:id="@+id/scanLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <!-- Camera Preview for QR Scanning (set size to a square) -->
+            <androidx.camera.view.PreviewView
+                android:id="@+id/previewView"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:layout_gravity="center"
+                android:background="#DDDDDD"
+                android:visibility="visible" />
+
+            <!-- Flashlight Button -->
+            <Button
+                android:id="@+id/flashlightButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Toggle Flashlight"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center"
+                android:visibility="visible"
+                tools:ignore="HardcodedText" />
+
+            <!-- Scan Status Text -->
+            <TextView
+                android:id="@+id/scanStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="18sp"
+                android:visibility="visible"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+</LinearLayout>
+</FrameLayout>

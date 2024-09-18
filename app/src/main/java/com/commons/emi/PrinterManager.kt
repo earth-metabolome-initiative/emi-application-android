@@ -34,13 +34,16 @@ object PrinterManager : AppCompatActivity(), PrinterUpdateListener, PrinterDisco
 
     // Initialize the printer discovery
     fun initializePrinterDiscovery(context: Context) {
-        if (::printerDetails.isInitialized) {
-            printerDetails.disconnectWithoutForget()
-        }
         try {
             // Clear previous data and listeners
             discoveredPrinters.clear()
-            onPrintersDiscovered = null
+
+            // Reset the discovery callback
+            onPrintersDiscovered = {
+                // Implement your UI update or list refresh logic here
+            }
+
+            // Initialize printer discovery
             printerDiscovery = PrinterDiscoveryFactory.getPrinterDiscovery(
                 context.applicationContext,
                 listOf(this)
@@ -53,13 +56,27 @@ object PrinterManager : AppCompatActivity(), PrinterUpdateListener, PrinterDisco
     // Start the BLE printer discovery process
     fun startPrinterDiscovery() {
         try {
+            // Disconnect from the previous printer if connected
+            if (::printerDetails.isInitialized && isPrinterReachable()) {
+                printerDetails.disconnectWithoutForget()
+                stopPrinterDiscovery() // Ensure the previous discovery is fully stopped
+            }
+
+            // Clear the discovered printers list to avoid showing outdated entries
+            discoveredPrinters.clear()
+
+            // Reset any discovery callback to avoid conflicts
+            onPrintersDiscovered = null
+
+            // Start the new printer discovery process
             printerDiscovery.startBlePrinterDiscovery()
+
         } catch (ex: Exception) {
             Log.e("PrinterManager", "Error starting printer discovery: ${ex.message}")
         }
     }
 
-    fun stopPrinterDiscovery() {
+    private fun stopPrinterDiscovery() {
         try {
             printerDiscovery.stopPrinterDiscovery()
         } catch (ex: Exception) {
@@ -82,32 +99,36 @@ object PrinterManager : AppCompatActivity(), PrinterUpdateListener, PrinterDisco
         context: Context,
         printerSelected: DiscoveredPrinterInformation,
     ) {
+        // Cancel any ongoing connection checks before starting a new one
+        connectionCheckJob?.cancel()
+
         if (printerSelected != printerDiscovery.lastConnectedPrinter) {
             printerDiscovery.forgetLastConnectedPrinter()
         }
+
         val r = Runnable {
             try {
-
                 this.printerDetails = printerDiscovery.connectToDiscoveredPrinter(
                     context,
                     printerSelected,
                     listOf(this)
                 )!!
             } catch (_: NullPointerException) {
-
-            } catch (_: Exception) {
+                Log.e("PrinterManager", "Error connecting to printer: NullPointerException")
+            } catch (e: Exception) {
+                Log.e("PrinterManager", "Error connecting to printer: ${e.message}")
             }
         }
         val connectThread = Thread(r)
         connectThread.start()
-        startPrinterConnectionCheck()
+        startPrinterConnectionCheck() // Restart the connection check after new connection is established
     }
 
     private fun startPrinterConnectionCheck() {
         connectionCheckJob = CoroutineScope(Dispatchers.IO).launch {
             while (isActive) {
                 checkPrinterConnection()
-                delay(TimeUnit.SECONDS.toMillis(10)) // Check every 10 seconds
+                delay(TimeUnit.SECONDS.toMillis(5)) // Check every 10 seconds
             }
         }
     }
@@ -116,10 +137,9 @@ object PrinterManager : AppCompatActivity(), PrinterUpdateListener, PrinterDisco
         _isConnected.postValue(isPrinterReachable())
     }
 
-    private fun isPrinterReachable(): Boolean {
+    fun isPrinterReachable(): Boolean {
         return if (::printerDetails.isInitialized) {
-            (printerDetails.printerStatusMessage == "PrinterStatus_Initialized"
-                    || printerDetails.printerStatusMessage == "PrinterStatus_BatteryLow")
+            printerDetails.printerStatusMessage == "PrinterStatus_Initialized" || printerDetails.printerStatusMessage == "PrinterStatus_BatteryLow"
         } else {
             false
         }
@@ -127,6 +147,7 @@ object PrinterManager : AppCompatActivity(), PrinterUpdateListener, PrinterDisco
 
     override fun PrinterUpdate(p0: MutableList<PrinterProperties>?) {
         Log.d("PrinterManager", "Printer updated: $p0")
+        onPrintersDiscovered = null
     }
 
     // This method is called when a printer is discovered

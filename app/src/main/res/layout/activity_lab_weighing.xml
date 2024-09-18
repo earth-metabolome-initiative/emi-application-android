@@ -1,46 +1,180 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center"
-    tools:context=".LabWeighingActivity">
+    android:layout_height="match_parent">
+
+    <Spinner
+        android:id="@+id/unitSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        tools:ignore="MissingConstraints,TouchTargetSizeCheck" />
 
     <TextView
+        android:id="@+id/unitLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="What do you want to search?"
+        android:text=""
+        android:gravity="center_horizontal"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp"
-        tools:ignore="HardcodedText" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        tools:ignore="HardcodedText,MissingConstraints" />
 
-    <Button
-        android:id="@+id/sampleButton"
+    <CheckBox
+        android:id="@+id/tickCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="A specific sample"
-        android:textSize="18sp"
-        android:layout_marginBottom="15dp"
-        tools:ignore="HardcodedText" />
+        android:text="set a weight constraint"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/unitSpinner"
+        tools:ignore="HardcodedText,MissingConstraints" />
 
-    <Button
-        android:id="@+id/rangeButton"
+    <TextView
+        android:id="@+id/infoLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="A range of samples"
-        android:textSize="18sp"
-        android:layout_marginBottom="15dp"
-        tools:ignore="HardcodedText" />
+        android:text=""
+        android:gravity="center_horizontal"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/unitSpinner"
+        tools:ignore="HardcodedText,MissingConstraints" />
 
-    <Button
-        android:id="@+id/speciesButton"
+    <TextView
+        android:id="@+id/chooseWeightLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="A specific species"
-        android:textSize="18sp"
-        android:layout_marginBottom="15dp"
+        android:text="Choose the target weight"
+        android:gravity="center_horizontal"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tickCheckBox"
+        android:layout_marginTop="16dp"
         tools:ignore="HardcodedText" />
 
-</LinearLayout>
+    <EditText
+        android:id="@+id/targetWeightInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="sample's weight"
+        android:inputType="number"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toStartOf="@id/targetWeightTolerance"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chooseWeightLabel"
+        tools:ignore="HardcodedText,MissingConstraints"
+        android:autofillHints="50" />
+
+    <EditText
+        android:id="@+id/targetWeightTolerance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="weight tolerance"
+        android:inputType="numberDecimal"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/targetWeightInput"
+        app:layout_constraintTop_toBottomOf="@id/chooseWeightLabel"
+        tools:ignore="HardcodedText,MissingConstraints"
+        android:autofillHints="2.5" />
+
+    <TextView
+        android:id="@+id/scanFalconLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Scan the falcon's QR code"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/targetWeightInput"
+        tools:ignore="HardcodedText" />
+
+
+    <Button
+        android:id="@+id/scanButtonFalcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Value"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scanFalconLabel"
+        tools:ignore="HardcodedText,MissingConstraints" />
+
+    <EditText
+        android:id="@+id/weightInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Enter the weight"
+        android:inputType="numberDecimal"
+        android:minHeight="48dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scanButtonFalcon"
+        tools:ignore="HardcodedText,MissingConstraints"
+        android:autofillHints="" />
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="108dp"
+        android:text="Submit"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/weightInput"
+        tools:ignore="HardcodedText,MissingConstraints" />
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        tools:ignore="MissingClass" />
+
+    <Button
+        android:id="@+id/flashlightButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="toggleFlashlight"
+        android:visibility="invisible"
+        android:text="light"
+        tools:ignore="HardcodedText,MissingConstraints,OnClick,TextContrastCheck" />
+
+    <TextView
+        android:id="@+id/scanStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="18sp"
+        android:gravity="center"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="MissingConstraints" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

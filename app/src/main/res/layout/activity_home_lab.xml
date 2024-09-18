@@ -1,55 +1,61 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
     android:gravity="center"
-    tools:context=".HomeLabActivity">
+    android:padding="16dp"
+    android:weightSum="5">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="What do you want to do in the lab?"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"
+    <Button
+        android:id="@+id/batchButton"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="Batches"
+        android:textSize="40sp"
+        android:layout_marginBottom="8dp"
         tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/preparingButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Prepare the samples"
-        android:textSize="18sp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="Preparation"
+        android:textSize="40sp"
+        android:layout_marginBottom="8dp"
         tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/weighingButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Weight samples"
-        android:textSize="18sp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="Weighing"
+        android:textSize="40sp"
+        android:layout_marginBottom="8dp"
         tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/extractionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Extract samples"
-        android:textSize="18sp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="Extraction"
+        android:textSize="40sp"
+        android:layout_marginBottom="8dp"
         tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/aliquotingButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Make aliquots"
-        android:textSize="18sp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="Aliquoting"
+        android:textSize="40sp"
+        android:layout_marginBottom="16dp"
         tools:ignore="HardcodedText" />
 
 </LinearLayout>

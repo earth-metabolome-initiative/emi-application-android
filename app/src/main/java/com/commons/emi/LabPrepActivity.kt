@@ -24,12 +24,16 @@ import java.net.HttpURLConnection
 class LabPrepActivity : BaseActivity() {
 
     // Initiate the displayed objects
+    private lateinit var containerLayout: View
     private lateinit var textContainer: TextView
     private lateinit var scanButtonContainer: Button
     private lateinit var emptyPlace: TextView
+
+    private lateinit var sampleLayout: View
     private lateinit var textSample: TextView
     private lateinit var scanButtonSample: Button
 
+    private lateinit var scanLayout: View
     private lateinit var previewView: PreviewView
     private lateinit var flashlightButton: Button
     private lateinit var noneButton: Button
@@ -50,11 +54,16 @@ class LabPrepActivity : BaseActivity() {
         title = "Preparation screen"
 
         // Initialize objects views
+        containerLayout = findViewById(R.id.containerLayout)
         textContainer = findViewById(R.id.textContainer)
         scanButtonContainer = findViewById(R.id.scanButtonContainer)
         emptyPlace = findViewById(R.id.emptyPlace)
+
+        sampleLayout = findViewById(R.id.sampleLayout)
         textSample = findViewById(R.id.textSample)
         scanButtonSample = findViewById(R.id.scanButtonSample)
+
+        scanLayout = findViewById(R.id.scanLayout)
         previewView = findViewById(R.id.previewView)
         flashlightButton = findViewById(R.id.flashlightButton)
         noneButton = findViewById(R.id.noneButton)
@@ -121,7 +130,7 @@ class LabPrepActivity : BaseActivity() {
     private fun manageScan() {
         if (isContainerScanActive) {
             CoroutineScope(Dispatchers.IO).launch {
-                val places = ContainerManager.checkContainer(scanButtonContainer.text.toString())
+                val places = DatabaseManager.checkContainer(scanButtonContainer.text.toString())
                 withContext(Dispatchers.Main) {
                     handleContainerScan(places)
                 }
@@ -143,8 +152,8 @@ class LabPrepActivity : BaseActivity() {
         // Perform the POST request to add the values on directus
         try {
             // Retrieve primary keys, token and URL
-            val collectionUrl = DirectusTokenManager.getInstance() + "/items/Dried_Samples_Data"
-            val accessToken = DirectusTokenManager.getAccessToken()
+            val collectionUrl = DatabaseManager.getInstance() + "/items/Dried_Samples_Data"
+            val accessToken = DatabaseManager.getAccessToken()
 
             val client = OkHttpClient()
 
@@ -165,25 +174,25 @@ class LabPrepActivity : BaseActivity() {
 
             val response = client.newCall(request).execute()
 
-            val responseCode = response.code
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                // Display a Toast with the response message
-                showToast("$sampleId correctly added to database")
+            withContext(Dispatchers.Main) {
 
-                // Check if there is still enough place in the container before initiating the QR code reader
-                val places =
-                    ContainerManager.checkContainer(scanButtonContainer.text.toString())
-                handleContainerScan(places)
-                if (places > 0) {
-                    delay(500)
-                    scanButtonSample.performClick()
-                }
-            } else {
-                withContext(Dispatchers.Main) {
-                    emptyPlace.visibility = View.VISIBLE
-                    emptyPlace.text =
-                        "$sampleId already added to database. If you want to move it to another container, please use the move stuff mode."
-                }
+                val responseCode = response.code
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    // Display a Toast with the response message
+                    showToast("$sampleId correctly added to database")
+
+                    // Check if there is still enough place in the container before initiating the QR code reader
+                    val places = DatabaseManager.checkContainer(scanButtonContainer.text.toString())
+                    handleContainerScan(places)
+                    if (places > 0) {
+                        delay(500)
+                        scanButtonSample.performClick()
+                    }
+                } else {
+                        emptyPlace.visibility = View.VISIBLE
+                        emptyPlace.text =
+                            "$sampleId already added to database.\nIf you want to move it, please use the move stuff mode."
+                    }
             }
         } catch (e: IOException) {
             showToast("Error: $e")
@@ -261,12 +270,12 @@ class LabPrepActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     fun handleObjectScan(containerId: String, sampleId: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            val containerModel = ContainerManager.getContainerModel(containerId)
-            val sampleModel = ContainerManager.getContainerModel(sampleId)
-            val isPairLegal = ContainerManager.checkContainerHierarchy(containerModel, sampleModel)
+            val containerModel = DatabaseManager.getContainerModel(containerId)
+            val sampleModel = DatabaseManager.getContainerModel(sampleId)
+            val isPairLegal = DatabaseManager.checkContainerHierarchy(containerId, containerModel, sampleModel)
             if (isPairLegal) {
-                val sampleKey = ContainerManager.getPrimaryKey(sampleId)
-                val containerKey = ContainerManager.getPrimaryKey(containerId)
+                val sampleKey = DatabaseManager.getPrimaryKey(sampleId)
+                val containerKey = DatabaseManager.getPrimaryKey(containerId)
                 withContext(Dispatchers.IO) {
                     sendDataToDirectus(sampleKey, containerKey, sampleId)
                 }
