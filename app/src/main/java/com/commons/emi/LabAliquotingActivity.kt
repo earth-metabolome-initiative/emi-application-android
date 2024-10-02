@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -36,22 +37,24 @@ class LabAliquotingActivity : BaseActivity() {
 
     // Initialize views
     private lateinit var volumeLayout: View
-    private lateinit var aliquotVolumeLabel: TextView
+    private lateinit var textAliquotVolume: TextView
     private lateinit var aliquotVolume: EditText
     private lateinit var unitSpinner: Spinner
     
     private lateinit var containerLayout: View
-    private lateinit var scanButtonContainerLabel: TextView
+    private lateinit var textScanButtonContainer: TextView
     private lateinit var scanButtonContainer: Button
     private lateinit var containerEmptyPlace: TextView
 
     private lateinit var aliquotLayout: View
-    private lateinit var scanButtonAliquotLabel: TextView
+    private lateinit var textScanButtonAliquot: TextView
     private lateinit var scanButtonAliquot: Button
-    
-    private lateinit var scanLayout: View
+
+    private lateinit var scanLayout: LinearLayout
     private lateinit var previewView: PreviewView
     private lateinit var flashlightButton: ImageButton
+    private lateinit var closeButton: ImageButton
+    private lateinit var noneButton: Button
     private lateinit var scanStatus: TextView
 
     // Define variables
@@ -79,22 +82,24 @@ class LabAliquotingActivity : BaseActivity() {
 
         // Initialize views
         volumeLayout = findViewById(R.id.volumeLayout)
-        aliquotVolumeLabel = findViewById(R.id.aliquotVolumeLabel)
+        textAliquotVolume = findViewById(R.id.textAliquotVolume)
         aliquotVolume = findViewById(R.id.aliquotVolume)
         unitSpinner = findViewById(R.id.unitSpinner)
         
         containerLayout = findViewById(R.id.containerLayout)
-        scanButtonContainerLabel = findViewById(R.id.scanButtonContainerLabel)
+        textScanButtonContainer = findViewById(R.id.textScanButtonContainer)
         scanButtonContainer = findViewById(R.id.scanButtonContainer)
         containerEmptyPlace = findViewById(R.id.containerEmptyPlace)
         
         aliquotLayout = findViewById(R.id.aliquotLayout)
-        scanButtonAliquotLabel = findViewById(R.id.scanButtonAliquotLabel)
+        textScanButtonAliquot = findViewById(R.id.textScanButtonAliquot)
         scanButtonAliquot = findViewById(R.id.scanButtonAliquot)
 
         scanLayout = findViewById(R.id.scanLayout)
         previewView = findViewById(R.id.previewView)
         flashlightButton = findViewById(R.id.flashlightButton)
+        closeButton = findViewById(R.id.closeButton)
+        noneButton = findViewById(R.id.noneButton)
         scanStatus = findViewById(R.id.scanStatus)
 
         fetchValuesAndPopulateUnitSpinner()
@@ -179,7 +184,7 @@ class LabAliquotingActivity : BaseActivity() {
                     val ids = HashMap<String, Int>()
 
                     // Add "Choose an option" to the list of values
-                    values.add("choose a unit")
+                    values.add("Choose a unit")
 
                     if (dataArray != null) {
                         for (i in 0 until dataArray.length()) {
@@ -199,10 +204,10 @@ class LabAliquotingActivity : BaseActivity() {
                         choices = values // Update choices list
                         val adapter = ArrayAdapter(
                             this@LabAliquotingActivity,
-                            android.R.layout.simple_spinner_item,
+                            R.layout.spinner_list,
                             values
                         )
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        adapter.setDropDownViewResource(R.layout.spinner_list)
                         unitSpinner.adapter = adapter
 
                         // Add an OnItemSelectedListener to update newExtractionMethod text and handle visibility
@@ -280,6 +285,7 @@ class LabAliquotingActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     fun updateUIForValidContainer(places: Int) {
         isContainerValid = true
+        visibilityManager()
         containerEmptyPlace.setTextColor(Color.GRAY)
         containerEmptyPlace.text = "This container should still contain $places empty places"
     }
@@ -287,6 +293,7 @@ class LabAliquotingActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     fun updateUIForFullContainer() {
         isContainerValid = false
+        visibilityManager()
         containerEmptyPlace.setTextColor(Color.RED)
         containerEmptyPlace.text = "This container is full, please scan another one"
         scanButtonContainer.text = "Value"
@@ -295,6 +302,7 @@ class LabAliquotingActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     fun updateUIForSampleTubeError() {
         isContainerValid = false
+        visibilityManager()
         containerEmptyPlace.setTextColor(Color.RED)
         containerEmptyPlace.text = "You are trying to scan a sample tube, please scan a valid container."
     }
@@ -302,6 +310,7 @@ class LabAliquotingActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     fun updateUIForIndeterminateContainer() {
         isContainerValid = true
+        visibilityManager()
         containerEmptyPlace.setTextColor(Color.GRAY)
         containerEmptyPlace.text = "This container is not determined as finite."
     }
@@ -309,6 +318,7 @@ class LabAliquotingActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     fun updateUIForInvalidContainer() {
         isContainerValid = false
+        visibilityManager()
         containerEmptyPlace.setTextColor(Color.RED)
         containerEmptyPlace.text = "Invalid container, please scan a valid one."
     }
@@ -455,6 +465,7 @@ class LabAliquotingActivity : BaseActivity() {
     }
 
     // Function that permits to control which extracts are already in the database and increment by one to create a unique one
+    @SuppressLint("DefaultLocale")
     private fun checkExistenceInDirectus(extract: String): String? {
         for (i in 1..99) {
             val testId = "${extract}_${String.format("%02d", i)}"
@@ -564,12 +575,6 @@ class LabAliquotingActivity : BaseActivity() {
             aliquotLayout.visibility = View.VISIBLE
         } else {
             aliquotLayout.visibility = View.GONE
-        }
-
-        if (isObjectValid) {
-            showToast("Object valid")
-        } else {
-            showToast("Object invalid")
         }
     }
 

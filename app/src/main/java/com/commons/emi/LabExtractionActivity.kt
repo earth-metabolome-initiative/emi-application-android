@@ -44,28 +44,30 @@ import java.net.HttpURLConnection
 class LabExtractionActivity : BaseActivity() {
 
     // Initialize views
-    private lateinit var methodLayout: View
-    private lateinit var extractionMethodLabel: TextView
-    private lateinit var newExtractionMethodLabel: TextView
+    private lateinit var textSummary: TextView
+
+    private lateinit var extractionMethodLayout: View
+    private lateinit var textExtractionMethod: TextView
+    private lateinit var textNewExtractionMethod: TextView
     private lateinit var extractionMethodSpinner: Spinner
-    private lateinit var extractionMethodDescription: TextView
+    private lateinit var descriptionExtractionMethod: TextView
 
     private lateinit var volumeLayout: View
-    private lateinit var solventVolumeLabel: TextView
+    private lateinit var textSolventVolume: TextView
     private lateinit var solventVolume: EditText
     private lateinit var unitSpinner: Spinner
 
     private lateinit var batchLayout: View
-    private lateinit var scanButtonBatchLabel: TextView
+    private lateinit var textScanButtonBatch: TextView
     private lateinit var scanButtonBatch: Button
 
     private lateinit var containerLayout: View
-    private lateinit var scanButtonContainerLabel: TextView
+    private lateinit var textScanButtonContainer: TextView
     private lateinit var scanButtonContainer: Button
     private lateinit var containerEmptyPlace: TextView
 
     private lateinit var extractLayout: View
-    private lateinit var scanButtonExtractLabel: TextView
+    private lateinit var textScanButtonExtract: TextView
     private lateinit var scanButtonExtract: Button
 
     private lateinit var scanLayout: LinearLayout
@@ -79,7 +81,9 @@ class LabExtractionActivity : BaseActivity() {
     private var choices: List<String> = mutableListOf("Choose an option")
     private var multiplication: String = ""
     private var unitId: Int = 0
+    private var unit: String = ""
     private var methodId: Int = 0
+    private var method: String = ""
     private var batchId: Int = 0
 
     // Define trackers
@@ -103,31 +107,35 @@ class LabExtractionActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        checkPrinterConnection()
+
         title = "Extraction screen"
 
         // Initialize views
-        methodLayout = findViewById(R.id.methodLayout)
-        extractionMethodLabel = findViewById(R.id.extractionMethodLabel)
-        newExtractionMethodLabel = findViewById(R.id.newExtractionMethodLabel)
+        textSummary = findViewById(R.id.textSummary)
+
+        extractionMethodLayout = findViewById(R.id.extractionMethodLayout)
+        textExtractionMethod = findViewById(R.id.textExtractionMethod)
+        textNewExtractionMethod = findViewById(R.id.textNewExtractionMethod)
         extractionMethodSpinner = findViewById(R.id.extractionMethodSpinner)
-        extractionMethodDescription = findViewById(R.id.extractionMethodDescription)
+        descriptionExtractionMethod = findViewById(R.id.descriptionExtractionMethod)
 
         volumeLayout = findViewById(R.id.volumeLayout)
-        solventVolumeLabel = findViewById(R.id.solventVolumeLabel)
+        textSolventVolume = findViewById(R.id.textSolventVolume)
         solventVolume = findViewById(R.id.solventVolume)
         unitSpinner = findViewById(R.id.unitSpinner)
 
         containerLayout = findViewById(R.id.containerLayout)
-        scanButtonContainerLabel = findViewById(R.id.scanButtonContainerLabel)
+        textScanButtonContainer = findViewById(R.id.textScanButtonContainer)
         scanButtonContainer = findViewById(R.id.scanButtonContainer)
         containerEmptyPlace = findViewById(R.id.containerEmptyPlace)
 
         batchLayout = findViewById(R.id.batchLayout)
-        scanButtonBatchLabel = findViewById(R.id.scanButtonBatchLabel)
+        textScanButtonBatch = findViewById(R.id.textScanButtonBatch)
         scanButtonBatch = findViewById(R.id.scanButtonBatch)
 
         extractLayout = findViewById(R.id.extractLayout)
-        scanButtonExtractLabel = findViewById(R.id.scanButtonExtractLabel)
+        textScanButtonExtract = findViewById(R.id.textScanButtonExtract)
         scanButtonExtract = findViewById(R.id.scanButtonExtract)
 
         // Access the included QR scanner views
@@ -139,7 +147,7 @@ class LabExtractionActivity : BaseActivity() {
         scanStatus = findViewById(R.id.scanStatus)
 
         // Make the link clickable for information text to create a new extraction method.
-        val linkTextView: TextView = newExtractionMethodLabel
+        val linkTextView: TextView = textNewExtractionMethod
         val spannableString = SpannableString(linkTextView.text)
         val clickableSpan = object : ClickableSpan() {
             override fun onClick(widget: View) {
@@ -288,15 +296,16 @@ class LabExtractionActivity : BaseActivity() {
                         choices = values // Update choices list
                         val adapter = ArrayAdapter(
                             this@LabExtractionActivity,
-                            android.R.layout.simple_spinner_item,
+                            R.layout.spinner_list,
                             values
                         )
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        adapter.setDropDownViewResource(R.layout.spinner_list)
                         extractionMethodSpinner.adapter = adapter
 
                         // Add an OnItemSelectedListener to update newExtractionMethod text and handle visibility
                         extractionMethodSpinner.onItemSelectedListener =
                             object : AdapterView.OnItemSelectedListener {
+                                @SuppressLint("SetTextI18n")
                                 override fun onItemSelected(
                                     parent: AdapterView<*>?,
                                     view: View?,
@@ -307,16 +316,20 @@ class LabExtractionActivity : BaseActivity() {
                                         val selectedValue = values[position]
                                         val selectedDescription = descriptions[selectedValue]
                                         methodId = ids[selectedValue].toString().toInt()
-                                        extractionMethodDescription.text = selectedDescription
+                                        method = selectedValue
+                                        descriptionExtractionMethod.text = selectedDescription
                                         isMethodFilled = true
                                         visibilityManager()
                                     } else {
+                                        descriptionExtractionMethod.text = ""
                                         isMethodFilled = false
                                         visibilityManager()
                                     }
                                 }
 
+                                @SuppressLint("SetTextI18n")
                                 override fun onNothingSelected(parent: AdapterView<*>?) {
+                                    descriptionExtractionMethod.text = ""
                                     isMethodFilled = false
                                     visibilityManager()
                                 }
@@ -357,7 +370,7 @@ class LabExtractionActivity : BaseActivity() {
                     val ids = HashMap<String, Int>()
 
                     // Add "Choose an option" to the list of values
-                    values.add("choose a unit")
+                    values.add("Choose a unit")
 
                     if (dataArray != null) {
                         for (i in 0 until dataArray.length()) {
@@ -379,10 +392,10 @@ class LabExtractionActivity : BaseActivity() {
                         choices = values // Update choices list
                         val adapter = ArrayAdapter(
                             this@LabExtractionActivity,
-                            android.R.layout.simple_spinner_item,
+                            R.layout.spinner_list,
                             values
                         )
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        adapter.setDropDownViewResource(R.layout.spinner_list)
                         unitSpinner.adapter = adapter
 
                         // Add an OnItemSelectedListener to update newExtractionMethod text and handle visibility
@@ -395,9 +408,10 @@ class LabExtractionActivity : BaseActivity() {
                                     id: Long
                                 ) {
                                     if (position > 0) { // Check if a valid option (not "Choose an option") is selected
-                                        val unit = unitSpinner.selectedItem.toString()
+                                        val selectedUnit = unitSpinner.selectedItem.toString()
                                         multiplication = multiplications[unit].toString()
-                                        unitId = ids[unit].toString().toInt()
+                                        unitId = ids[selectedUnit].toString().toInt()
+                                        unit = selectedUnit
                                         isUnitFilled = true
                                         visibilityManager()
                                     } else {
@@ -699,6 +713,7 @@ class LabExtractionActivity : BaseActivity() {
         printThread.start()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun visibilityManager () {
         if (isMethodFilled) {
             volumeLayout.visibility = View.VISIBLE
@@ -725,8 +740,16 @@ class LabExtractionActivity : BaseActivity() {
         }
         if (isContainerValid) {
             extractLayout.visibility = View.VISIBLE
+            textSummary.visibility = View.VISIBLE
+            extractionMethodLayout.visibility = View.GONE
+            volumeLayout.visibility = View.GONE
+            textSummary.text = "Extraction method: $method\n\nSolvent volume: ${solventVolume.text} $unit"
         } else {
             extractLayout.visibility = View.GONE
+            textSummary.visibility = View.GONE
+            extractionMethodLayout.visibility = View.VISIBLE
+            volumeLayout.visibility = View.VISIBLE
+            textSummary.text = ""
         }
     }
 

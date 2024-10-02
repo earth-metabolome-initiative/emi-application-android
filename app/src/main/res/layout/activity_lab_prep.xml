@@ -30,8 +30,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:visibility="visible">
+                    android:gravity="center">
 
                     <TextView
                         android:id="@+id/textContainer"
@@ -94,6 +93,7 @@
                         android:gravity="center"
                         android:layout_marginBottom="16dp"
                         tools:ignore="HardcodedText" />
+
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>

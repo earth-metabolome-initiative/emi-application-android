@@ -49,6 +49,8 @@ class LabBatchActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        checkPrinterConnection()
+
         title = "Batch screen"
 
         batchText = findViewById(R.id.batchText)
@@ -63,8 +65,6 @@ class LabBatchActivity : BaseActivity() {
                 createDriedBatch()
             }
         }
-
-        checkPrinterConnection()
 
         // Observe changes to the ViewModel's text LiveData
         myViewModel.text.observe(this) { newText ->

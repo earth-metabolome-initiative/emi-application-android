@@ -86,6 +86,8 @@ class LabWeighingActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        checkPrinterConnection()
+
         title = "Weighing screen"
 
         // Initialize objects views
@@ -246,7 +248,7 @@ class LabWeighingActivity : BaseActivity() {
                     val ids = HashMap<String, Int>()
 
                     // Add "Choose an option" to the list of values
-                    values.add("choose a unit")
+                    values.add("Choose a unit")
 
                     if (dataArray != null) {
                         for (i in 0 until dataArray.length()) {
