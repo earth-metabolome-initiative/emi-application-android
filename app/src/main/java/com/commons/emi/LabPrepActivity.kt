@@ -5,12 +5,13 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.view.PreviewView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -33,15 +34,18 @@ class LabPrepActivity : BaseActivity() {
     private lateinit var textSample: TextView
     private lateinit var scanButtonSample: Button
 
-    private lateinit var scanLayout: View
+    private lateinit var scanLayout: LinearLayout
     private lateinit var previewView: PreviewView
-    private lateinit var flashlightButton: Button
+    private lateinit var flashlightButton: ImageButton
+    private lateinit var closeButton: ImageButton
     private lateinit var noneButton: Button
     private lateinit var scanStatus: TextView
 
-    private var isContainerScanActive = false
-    private var isObjectScanActive = false
+    // Define trackers
     private var isQrScannerActive = false
+    private var isContainerScanActive = false
+    private var isContainerValid = false
+    private var isObjectScanActive = false
 
     override fun getLayoutResourceId(): Int {
         return R.layout.activity_lab_prep
@@ -66,6 +70,7 @@ class LabPrepActivity : BaseActivity() {
         scanLayout = findViewById(R.id.scanLayout)
         previewView = findViewById(R.id.previewView)
         flashlightButton = findViewById(R.id.flashlightButton)
+        closeButton = findViewById(R.id.closeButton)
         noneButton = findViewById(R.id.noneButton)
         scanStatus = findViewById(R.id.scanStatus)
 
@@ -74,25 +79,17 @@ class LabPrepActivity : BaseActivity() {
             isContainerScanActive = true
             isObjectScanActive = false
             isQrScannerActive = true
-            previewView.visibility = View.VISIBLE
-            scanStatus.text = "Scan a container"
-            flashlightButton.visibility = View.VISIBLE
+            visibilityManager()
             noneButton.visibility = View.VISIBLE
-            scanButtonContainer.visibility = View.INVISIBLE
-            textSample.visibility = View.INVISIBLE
-            scanButtonSample.visibility = View.INVISIBLE
+            scanStatus.text = "Scan a container"
             ScanManager.initialize(this, previewView, flashlightButton, noneButton) {scannedContainer ->
 
                 // Stop the scanning process after receiving the result
                 ScanManager.stopScanning()
                 isQrScannerActive = false
-                previewView.visibility = View.INVISIBLE
-                flashlightButton.visibility = View.INVISIBLE
-                noneButton.visibility = View.INVISIBLE
-                scanButtonContainer.visibility = View.VISIBLE
-                textSample.visibility = View.VISIBLE
-                scanButtonSample.visibility = View.VISIBLE
-                scanStatus.text = ""
+                visibilityManager()
+                noneButton.visibility = View.GONE
+                scanButtonContainer.textSize = 25f
                 scanButtonContainer.text = scannedContainer
                 manageScan()
             }
@@ -103,26 +100,24 @@ class LabPrepActivity : BaseActivity() {
             isContainerScanActive = false
             isObjectScanActive = true
             isQrScannerActive = true
-            previewView.visibility = View.VISIBLE
+            visibilityManager()
             scanStatus.text = "Scan a sample"
-            flashlightButton.visibility = View.VISIBLE
-            scanButtonContainer.visibility = View.INVISIBLE
-            textSample.visibility = View.INVISIBLE
-            scanButtonSample.visibility = View.INVISIBLE
             ScanManager.initialize(this, previewView, flashlightButton) { scannedSample ->
 
                 // Stop the scanning process after receiving the result
                 ScanManager.stopScanning()
                 isQrScannerActive = false
-                previewView.visibility = View.INVISIBLE
-                flashlightButton.visibility = View.INVISIBLE
-                scanButtonContainer.visibility = View.VISIBLE
-                textSample.visibility = View.VISIBLE
-                scanButtonSample.visibility = View.VISIBLE
-                scanStatus.text = ""
+                visibilityManager()
+                scanButtonSample.textSize = 25f
                 scanButtonSample.text = scannedSample
                 manageScan()
             }
+        }
+
+        closeButton.setOnClickListener {
+            ScanManager.stopScanning()
+            isQrScannerActive = false
+            visibilityManager()
         }
 
     }
@@ -185,7 +180,6 @@ class LabPrepActivity : BaseActivity() {
                     val places = DatabaseManager.checkContainer(scanButtonContainer.text.toString())
                     handleContainerScan(places)
                     if (places > 0) {
-                        delay(500)
                         scanButtonSample.performClick()
                     }
                 } else {
@@ -201,58 +195,50 @@ class LabPrepActivity : BaseActivity() {
 
     @SuppressLint("SetTextI18n")
     fun updateUIForValidContainer(places: Int) {
-        textSample.visibility = View.VISIBLE
-        scanButtonSample.visibility = View.VISIBLE
-        emptyPlace.visibility = View.VISIBLE
+        isContainerValid = true
+        visibilityManager()
         emptyPlace.setTextColor(Color.GRAY)
         emptyPlace.text = "This container should still contain $places empty places"
     }
 
     @SuppressLint("SetTextI18n")
     fun updateUIForFullContainer() {
-        emptyPlace.visibility = View.VISIBLE
+        isContainerValid = false
+        visibilityManager()
         emptyPlace.text = "This container is full, please scan another one"
         scanButtonContainer.text = "Value"
-        scanButtonSample.visibility = View.INVISIBLE
-        textSample.visibility = View.INVISIBLE
         emptyPlace.setTextColor(Color.RED)
     }
 
     @SuppressLint("SetTextI18n")
     fun updateUIForSampleTubeError() {
-        emptyPlace.visibility = View.VISIBLE
+        isContainerValid = false
+        visibilityManager()
         emptyPlace.text = "You are trying to scan a sample tube, please scan a valid container."
-        scanButtonSample.visibility = View.INVISIBLE
-        textSample.visibility = View.INVISIBLE
         emptyPlace.setTextColor(Color.RED)
     }
 
     @SuppressLint("SetTextI18n")
     fun updateUIForIndeterminateContainer() {
-        textSample.visibility = View.VISIBLE
-        scanButtonSample.visibility = View.VISIBLE
-        emptyPlace.visibility = View.VISIBLE
+        isContainerValid = true
+        visibilityManager()
         emptyPlace.setTextColor(Color.GRAY)
         emptyPlace.text = "This container is not determined as finite."
     }
 
     @SuppressLint("SetTextI18n")
     fun updateUIForInvalidContainer() {
-        emptyPlace.visibility = View.VISIBLE
+        isContainerValid = false
+        visibilityManager()
         emptyPlace.text = "Invalid container, please scan a valid one."
-        scanButtonSample.visibility = View.INVISIBLE
-        textSample.visibility = View.INVISIBLE
         emptyPlace.setTextColor(Color.RED)
     }
 
     @SuppressLint("SetTextI18n")
-    fun updateUIForUnknownError(places: Int) {
-        showToast("places: $places")
-        emptyPlace.visibility = View.VISIBLE
+    fun updateUIForUnknownError() {
+        isContainerValid = false
+        visibilityManager()
         emptyPlace.text = "Unknown error, please restart the application."
-        scanButtonContainer.visibility = View.INVISIBLE
-        scanButtonSample.visibility = View.INVISIBLE
-        textSample.visibility = View.INVISIBLE
         emptyPlace.setTextColor(Color.RED)
     }
 
@@ -263,7 +249,7 @@ class LabPrepActivity : BaseActivity() {
             -1 -> updateUIForSampleTubeError()
             -3 -> updateUIForIndeterminateContainer()
             -4 -> updateUIForInvalidContainer()
-            else -> updateUIForUnknownError(places)
+            else -> updateUIForUnknownError()
         }
     }
 
@@ -272,7 +258,7 @@ class LabPrepActivity : BaseActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val containerModel = DatabaseManager.getContainerModel(containerId)
             val sampleModel = DatabaseManager.getContainerModel(sampleId)
-            val isPairLegal = DatabaseManager.checkContainerHierarchy(containerId, containerModel, sampleModel)
+            val isPairLegal = DatabaseManager.checkContainerHierarchy(containerModel, sampleModel)
             if (isPairLegal) {
                 val sampleKey = DatabaseManager.getPrimaryKey(sampleId)
                 val containerKey = DatabaseManager.getPrimaryKey(containerId)
@@ -281,12 +267,25 @@ class LabPrepActivity : BaseActivity() {
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    emptyPlace.visibility = View.VISIBLE
                     emptyPlace.setTextColor(Color.RED)
                     emptyPlace.text =
                         "Invalid pair. You are not allowed to put this child container in this parent container."
                 }
             }
+        }
+    }
+
+    private fun visibilityManager () {
+
+        if (isQrScannerActive) {
+            scanLayout.visibility = View.VISIBLE
+        } else {
+            scanLayout.visibility = View.GONE
+        }
+        if (isContainerValid) {
+            sampleLayout.visibility = View.VISIBLE
+        } else {
+            sampleLayout.visibility = View.GONE
         }
     }
 

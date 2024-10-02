@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
@@ -13,6 +12,8 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -35,30 +36,47 @@ import java.net.HttpURLConnection
 class LabWeighingActivity : BaseActivity() {
 
     // Initiate the displayed objects
+    private lateinit var unitLayout: View
     private lateinit var unitSpinner: Spinner
-    private lateinit var unitLabel: TextView
+
+    private lateinit var tickLayout: View
     private lateinit var tickCheckBox: CheckBox
     private lateinit var infoLabel: TextView
+
+    private lateinit var constraintLayout: View
     private lateinit var chooseWeightLabel: TextView
     private lateinit var targetWeightInput: EditText
     private lateinit var targetWeightTolerance: EditText
-    private lateinit var scanFalconLabel: TextView
-    private lateinit var scanButtonFalcon: Button
+
+    private lateinit var sampleLayout: View
+    private lateinit var scanSampleLabel: TextView
+    private lateinit var scanButtonSample: Button
+
+    private lateinit var weightLayout: View
     private lateinit var weightInput: EditText
     private lateinit var submitButton: Button
 
-    // Initiate scanner view
+    private lateinit var scanLayout: LinearLayout
     private lateinit var previewView: PreviewView
-    private lateinit var flashlightButton: Button
+    private lateinit var flashlightButton: ImageButton
+    private lateinit var closeButton: ImageButton
+    private lateinit var noneButton: Button
     private lateinit var scanStatus: TextView
 
+    // Variables
     private var choices: List<String> = mutableListOf("choose a unit")
-    private var isTargetWeightInputFilled = false
-    private var isTargetWeightToleranceFilled = false
     private var multiplication: String = ""
     private var unitId: Int = 0
+
+    // Trackers
+    private var isUnitSelected = false
+    private var isConstraintActive = true
+    private var isConstraintValid = false
+    private var isTargetWeightInputFilled = false
+    private var isTargetWeightToleranceFilled = false
     private var isObjectScanActive = false
     private var isQrScannerActive = false
+    private var isObjectValid = false
 
     override fun getLayoutResourceId(): Int {
         return R.layout.activity_lab_weighing
@@ -71,19 +89,31 @@ class LabWeighingActivity : BaseActivity() {
         title = "Weighing screen"
 
         // Initialize objects views
-        unitLabel = findViewById(R.id.unitLabel)
+        unitLayout = findViewById(R.id.unitLayout)
         unitSpinner = findViewById(R.id.unitSpinner)
+
+        tickLayout = findViewById(R.id.tickLayout)
         tickCheckBox = findViewById(R.id.tickCheckBox)
         infoLabel = findViewById(R.id.infoLabel)
+
+        constraintLayout = findViewById(R.id.constraintLayout)
         chooseWeightLabel = findViewById(R.id.chooseWeightLabel)
         targetWeightInput = findViewById(R.id.targetWeightInput)
         targetWeightTolerance = findViewById(R.id.targetWeightTolerance)
-        scanFalconLabel = findViewById(R.id.scanFalconLabel)
-        scanButtonFalcon = findViewById(R.id.scanButtonFalcon)
+
+        sampleLayout = findViewById(R.id.sampleLayout)
+        scanSampleLabel = findViewById(R.id.scanSampleLabel)
+        scanButtonSample = findViewById(R.id.scanButtonSample)
+
+        weightLayout = findViewById(R.id.weightLayout)
         weightInput = findViewById(R.id.weightInput)
         submitButton = findViewById(R.id.submitButton)
+
+        scanLayout = findViewById(R.id.scanLayout)
         previewView = findViewById(R.id.previewView)
         flashlightButton = findViewById(R.id.flashlightButton)
+        closeButton = findViewById(R.id.closeButton)
+        noneButton = findViewById(R.id.noneButton)
         scanStatus = findViewById(R.id.scanStatus)
 
         // Fetch extraction methods and populate the extraction method spinner.
@@ -95,20 +125,12 @@ class LabWeighingActivity : BaseActivity() {
         tickCheckBox.setOnCheckedChangeListener { _, isChecked ->
             // Do something with the ticked state
             if (isChecked) {
-                showToast("checked")
-                chooseWeightLabel.visibility = View.VISIBLE
-                targetWeightInput.visibility = View.VISIBLE
-                targetWeightTolerance.visibility = View.VISIBLE
-                scanFalconLabel.visibility = View.INVISIBLE
-                scanButtonFalcon.visibility = View.INVISIBLE
+                isConstraintActive = true
+                visibilityManager()
 
             } else {
-                showToast("not checked")
-                chooseWeightLabel.visibility = View.INVISIBLE
-                targetWeightInput.visibility = View.INVISIBLE
-                targetWeightTolerance.visibility = View.INVISIBLE
-                scanFalconLabel.visibility = View.VISIBLE
-                scanButtonFalcon.visibility = View.VISIBLE
+                isConstraintActive = false
+                visibilityManager()
             }
         }
 
@@ -137,41 +159,27 @@ class LabWeighingActivity : BaseActivity() {
         })
 
         // Set up button click listener for Object QR Scanner
-        scanButtonFalcon.setOnClickListener {
+        scanButtonSample.setOnClickListener {
             val inputMethodManager =
                 getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(targetWeightInput.windowToken, 0)
-            unitSpinner.visibility = View.INVISIBLE
-            unitLabel.text = "selected unit: ${unitSpinner.selectedItem}"
-            tickCheckBox.visibility = View.INVISIBLE
-            chooseWeightLabel.visibility = View.INVISIBLE
             isObjectScanActive = true
             isQrScannerActive = true
-            previewView.visibility = View.VISIBLE
+            visibilityManager()
             scanStatus.text = "Scan falcon"
-            flashlightButton.visibility = View.VISIBLE
-            targetWeightInput.visibility = View.INVISIBLE
-            targetWeightTolerance.visibility = View.INVISIBLE
-            scanButtonFalcon.visibility = View.INVISIBLE
-            submitButton.visibility = View.INVISIBLE
             ScanManager.initialize(this, previewView, flashlightButton) { scannedSample ->
-
                 // Stop the scanning process after receiving the result
                 ScanManager.stopScanning()
                 isQrScannerActive = false
-                previewView.visibility = View.INVISIBLE
-                flashlightButton.visibility = View.INVISIBLE
-                scanButtonFalcon.visibility = View.VISIBLE
-                scanButtonFalcon.text = "Value"
-                weightInput.visibility = View.VISIBLE
-                submitButton.visibility = View.VISIBLE
+                isObjectValid = true
+                visibilityManager()
                 weightInput.postDelayed({
                     weightInput.requestFocus()
                     showKeyboard()
                 }, 200)
                 weightInput.text = null
                 scanStatus.text = ""
-                scanButtonFalcon.text = scannedSample
+                scanButtonSample.text = scannedSample
             }
         }
 
@@ -182,10 +190,7 @@ class LabWeighingActivity : BaseActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
-                targetWeightInput.visibility = View.INVISIBLE
-                targetWeightTolerance.visibility = View.INVISIBLE
-                chooseWeightLabel.visibility = View.INVISIBLE
-                if (tickCheckBox.isChecked){
+                if (isConstraintActive){
                     val inputText = s.toString()
                     val inputNumber = inputText.toFloatOrNull()
                     val weightNumber = targetWeightInput.text.toString()
@@ -194,10 +199,10 @@ class LabWeighingActivity : BaseActivity() {
                     val bigNumber = weightNumber.toInt() + tolerance.toDouble()
                     if (inputNumber != null && inputNumber >= smallNumber && inputNumber <= bigNumber) {
                         weightInput.setBackgroundResource(android.R.color.transparent) // Set background to transparent if valid
-                        submitButton.visibility = View.VISIBLE // Show submitButton if valid
+                        submitButton.visibility = View.VISIBLE
                     } else {
                         weightInput.setBackgroundResource(android.R.color.holo_red_light) // Set background to red if not valid
-                        submitButton.visibility = View.INVISIBLE // Hide submitButton if not valid
+                        submitButton.visibility = View.GONE // Hide submitButton if not valid
                     }
                 } else {
                     weightInput.setBackgroundResource(android.R.color.transparent) // Set background to transparent if valid
@@ -205,12 +210,16 @@ class LabWeighingActivity : BaseActivity() {
                 }
             }
         })
+
         submitButton.setOnClickListener {
-            submitButton.visibility= View.INVISIBLE
+            submitButton.visibility= View.GONE
             val inputText = weightInput.text.toString()
             val inputNumber = inputText.toFloatOrNull()
             val unit = unitId
-            CoroutineScope(Dispatchers.IO).launch { sendDataToDirectus(scanButtonFalcon.text.toString(), inputNumber.toString(), unit)}}
+            CoroutineScope(Dispatchers.IO).launch {
+                sendDataToDirectus(scanButtonSample.text.toString(), inputNumber.toString(), unit)
+            }
+        }
     }
 
     // Function to obtain extraction methods from directus and to populate the spinner.
@@ -259,10 +268,10 @@ class LabWeighingActivity : BaseActivity() {
                         choices = values // Update choices list
                         val adapter = ArrayAdapter(
                             this@LabWeighingActivity,
-                            android.R.layout.simple_spinner_item,
+                            R.layout.spinner_list,
                             values
                         )
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        adapter.setDropDownViewResource(R.layout.spinner_list)
                         unitSpinner.adapter = adapter
 
                         // Add an OnItemSelectedListener to update newExtractionMethod text and handle visibility
@@ -274,24 +283,21 @@ class LabWeighingActivity : BaseActivity() {
                                     position: Int,
                                     id: Long
                                 ) {
-                                    if (position > 0) { // Check if a valid option (not "Choose an option") is selected
-                                        tickCheckBox.visibility = View.VISIBLE
-                                        chooseWeightLabel.visibility = View.VISIBLE
-                                        targetWeightInput.visibility = View.VISIBLE
-                                        targetWeightTolerance.visibility = View.VISIBLE
+                                    if (position > 0) {
+                                        isUnitSelected = true
+                                        visibilityManager()
                                         val unit = unitSpinner.selectedItem.toString()
                                         multiplication = multiplications[unit].toString()
                                         unitId = ids[unit].toString().toInt()
                                     } else {
-                                        tickCheckBox.visibility = View.INVISIBLE
-                                        chooseWeightLabel.visibility = View.INVISIBLE
-                                        targetWeightInput.visibility = View.INVISIBLE
-                                        targetWeightTolerance.visibility = View.INVISIBLE
+                                        isUnitSelected = false
+                                        visibilityManager()
                                     }
                                 }
 
                                 override fun onNothingSelected(parent: AdapterView<*>?) {
-
+                                    isUnitSelected = false
+                                    visibilityManager()
                                 }
                             }
                     }
@@ -309,10 +315,8 @@ class LabWeighingActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     private fun updateButtonVisibility() {
         if (isTargetWeightInputFilled && isTargetWeightToleranceFilled) {
-            scanFalconLabel.visibility = View.VISIBLE
-            scanButtonFalcon.visibility = View.VISIBLE
-            tickCheckBox.visibility = View.INVISIBLE
-            chooseWeightLabel.visibility = View.INVISIBLE
+            isConstraintValid = true
+            visibilityManager()
             val target = targetWeightInput.text.toString()
             val correctedTarget = target.toInt()*multiplication.toDouble()
             if (correctedTarget <= 0.00001) {
@@ -326,10 +330,8 @@ class LabWeighingActivity : BaseActivity() {
             }
 
         } else {
-            scanFalconLabel.visibility = View.INVISIBLE
-            scanButtonFalcon.visibility = View.INVISIBLE
-            tickCheckBox.visibility = View.VISIBLE
-            chooseWeightLabel.visibility = View.VISIBLE
+            isConstraintValid = false
+            visibilityManager()
         }
     }
 
@@ -451,10 +453,12 @@ class LabWeighingActivity : BaseActivity() {
                                 // Start a coroutine to delay the next scan by 5 seconds
                                 CoroutineScope(Dispatchers.Main).launch {
                                     delay(1500)
-                                    scanButtonFalcon.performClick()
+                                    scanButtonSample.performClick()
                                 }
                             } else {
                                 showToast("Error, $extractId couldn't be added to database.")
+                                isObjectValid = false
+                                visibilityManager()
                             }
 
                         } else {
@@ -530,6 +534,40 @@ class LabWeighingActivity : BaseActivity() {
     private fun showKeyboard() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(weightInput, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    private fun visibilityManager () {
+        if (isUnitSelected) {
+            tickLayout.visibility = View.VISIBLE
+        } else {
+            tickLayout.visibility = View.GONE
+        }
+        if (isConstraintActive) {
+            constraintLayout.visibility = View.VISIBLE
+        } else {
+            constraintLayout.visibility = View.GONE
+            isConstraintValid = true
+        }
+        if (isConstraintValid) {
+            sampleLayout.visibility = View.VISIBLE
+        } else {
+            sampleLayout.visibility = View.VISIBLE
+        }
+        if (isQrScannerActive) {
+            scanLayout.visibility = View.VISIBLE
+        } else {
+            scanLayout.visibility = View.GONE
+        }
+        if (isObjectScanActive) {
+            constraintLayout.visibility = View.GONE
+        } else {
+            constraintLayout.visibility = View.VISIBLE
+        }
+        if (isObjectValid) {
+            weightLayout.visibility = View.VISIBLE
+        } else {
+            weightLayout.visibility = View.GONE
+        }
     }
 
     // Function that permits to easily display toasts.

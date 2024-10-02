@@ -387,7 +387,48 @@ object DatabaseManager {
     }
 
     suspend fun getExtractionDataPrimaryKey(extactId: Int): Int = withContext(Dispatchers.IO) {
+        try {
+            val id: Int
 
+            val collectionUrl = "${getInstance()}/items/Extraction_Data?filter[sample_container][_eq]=$extactId&&limit=1"
+
+            Log.d("DatabaseManager", collectionUrl)
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            Log.d("DatabaseManager", "error code: ${response.code}, error message: ${response.message}")
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val idExtraction = firstItem.optInt("id")
+                        id = idExtraction
+                        id
+                    } else {
+                        id = -2 // no data found
+                        id
+                    }
+                } else {
+                    id = -3 //response body null
+                    id
+                }
+            } else {
+                -4// non 200 response
+            }
+        } catch (e: IOException) {
+            -5 // internet or other errors
+        }
     }
 
     suspend fun getContainerModel(container: String): Int = withContext(Dispatchers.IO) {
@@ -436,14 +477,10 @@ object DatabaseManager {
         }
     }
 
-    suspend fun checkContainerHierarchy(container: String, containerKey: Int, sampleKey: Int): Boolean = withContext(Dispatchers.IO) {
+    suspend fun checkContainerHierarchy(containerKey: Int, sampleKey: Int): Boolean = withContext(Dispatchers.IO) {
         try {
-            val collectionUrl = if (container.matches(Regex("^container_\\dx\\d_\\d{6}\$")) || container == "absent") {
-                "${getInstance()}/items/Containers?filter[old_id][_eq]=$container&&limit=1"
-            } else {
-                "${getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
-            }
-
+            val collectionUrl = "${getInstance()}/items/Container_Rules?filter[parent_container][_eq]=$containerKey&&filter[child_container][_eq]=$sampleKey&&limit=1"
+            Log.d("DatabaseManager", collectionUrl)
             val client = OkHttpClient()
             val request = Request.Builder()
                 .addHeader("Accept", "application/json")

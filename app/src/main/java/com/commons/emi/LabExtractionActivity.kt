@@ -18,12 +18,13 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.view.PreviewView
 import com.bradysdk.api.printerconnection.CutOption
-import com.bradysdk.api.printerconnection.PrinterDetails
 import com.bradysdk.api.printerconnection.PrintingOptions
 import com.bradysdk.printengine.templateinterface.TemplateFactory
 import kotlinx.coroutines.CoroutineScope
@@ -67,9 +68,11 @@ class LabExtractionActivity : BaseActivity() {
     private lateinit var scanButtonExtractLabel: TextView
     private lateinit var scanButtonExtract: Button
 
-    private lateinit var scanLayout: View
+    private lateinit var scanLayout: LinearLayout
     private lateinit var previewView: PreviewView
-    private lateinit var flashlightButton: Button
+    private lateinit var flashlightButton: ImageButton
+    private lateinit var closeButton: ImageButton
+    private lateinit var noneButton: Button
     private lateinit var scanStatus: TextView
 
     // Define variables
@@ -127,9 +130,12 @@ class LabExtractionActivity : BaseActivity() {
         scanButtonExtractLabel = findViewById(R.id.scanButtonExtractLabel)
         scanButtonExtract = findViewById(R.id.scanButtonExtract)
 
+        // Access the included QR scanner views
         scanLayout = findViewById(R.id.scanLayout)
         previewView = findViewById(R.id.previewView)
         flashlightButton = findViewById(R.id.flashlightButton)
+        closeButton = findViewById(R.id.closeButton)
+        noneButton = findViewById(R.id.noneButton)
         scanStatus = findViewById(R.id.scanStatus)
 
         // Make the link clickable for information text to create a new extraction method.
@@ -178,15 +184,15 @@ class LabExtractionActivity : BaseActivity() {
             isContainerScanActive = false
             isObjectScanActive = false
             isQrScannerActive = true
-            scanStatus.text = "Scan batch"
             visibilityManager()
+            scanStatus.text = "Scan batch"
             ScanManager.initialize(this, previewView, flashlightButton) { scannedBatch ->
 
                 // Stop the scanning process after receiving the result
                 ScanManager.stopScanning()
                 isQrScannerActive = false
-                scanButtonBatch.text = scannedBatch
                 visibilityManager()
+                scanButtonBatch.text = scannedBatch
                 manageScan()
             }
         }
@@ -199,13 +205,15 @@ class LabExtractionActivity : BaseActivity() {
             isObjectScanActive = false
             isBatchActive = false
             isQrScannerActive = true
-            scanStatus.text = "Scan container"
             visibilityManager()
-            ScanManager.initialize(this, previewView, flashlightButton) { scannedContainer ->
+            scanStatus.text = "Scan container"
+            noneButton.visibility = View.VISIBLE
+            ScanManager.initialize(this, previewView, flashlightButton, noneButton) { scannedContainer ->
 
                 // Stop the scanning process after receiving the result
                 ScanManager.stopScanning()
                 isQrScannerActive = false
+                noneButton.visibility = View.GONE
                 scanButtonContainer.text = scannedContainer
                 visibilityManager()
                 manageScan()
@@ -218,17 +226,22 @@ class LabExtractionActivity : BaseActivity() {
             isContainerScanActive = false
             isBatchActive = false
             isQrScannerActive = true
-            scanStatus.text = "Scan extract"
             visibilityManager()
+            scanStatus.text = "Scan extract"
             ScanManager.initialize(this, previewView, flashlightButton) { scannedSample ->
 
                 // Stop the scanning process after receiving the result
                 ScanManager.stopScanning()
                 isQrScannerActive = false
-                scanButtonExtract.text = scannedSample
                 visibilityManager()
+                scanButtonExtract.text = scannedSample
                 manageScan()
             }
+        }
+
+        closeButton.setOnClickListener {
+            isQrScannerActive = false
+            visibilityManager()
         }
     }
 
@@ -534,7 +547,7 @@ class LabExtractionActivity : BaseActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val containerModel = DatabaseManager.getContainerModel(container)
             val extractModel = DatabaseManager.getContainerModel(extract)
-            val isPairLegal = DatabaseManager.checkContainerHierarchy(container, containerModel, extractModel)
+            val isPairLegal = DatabaseManager.checkContainerHierarchy(containerModel, extractModel)
             if (isPairLegal) {
                 val extractId = DatabaseManager.getPrimaryKey(extract)
                 val containerId = DatabaseManager.getPrimaryKey(container)
@@ -573,9 +586,10 @@ class LabExtractionActivity : BaseActivity() {
     ) {
         // Perform the PATCH request to add the values on directus
         try {
-            DatabaseManager.getExtractionDataPrimaryKey(extractId)
+            val id = DatabaseManager.getExtractionDataPrimaryKey(extractId)
             // Retrieve primary keys, token and URL
-            val collectionUrl = DatabaseManager.getInstance() + "/items/Extraction_Data/$extractId"
+            showToast("id: $id")
+            val collectionUrl = DatabaseManager.getInstance() + "/items/Extraction_Data/$id"
             Log.d("LabExtractionActivity", "URL: $collectionUrl")
             val accessToken = DatabaseManager.getAccessToken()
 
@@ -713,12 +727,6 @@ class LabExtractionActivity : BaseActivity() {
             extractLayout.visibility = View.VISIBLE
         } else {
             extractLayout.visibility = View.GONE
-        }
-
-        if (isObjectValid) {
-            //showToast("Object valid")
-        } else {
-            //showToast("Object invalid")
         }
     }
 

@@ -1,9 +1,9 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_gravity="center"
+    android:padding="8dp">
 
     <!-- Centering LinearLayout -->
     <LinearLayout
@@ -30,7 +30,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginTop="8dp"
-                    android:gravity="center_horizontal"
+                    android:gravity="center"
                     android:visibility="visible">
 
                     <TextView
@@ -38,32 +38,31 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Scan container's QR code"
-                        android:textSize="20sp"
-                        android:gravity="center_horizontal"
+                        android:textSize="40sp"
+                        android:gravity="center"
                         android:textStyle="bold"
-                        tools:ignore="HardcodedText,MissingConstraints" />
+                        android:layout_marginBottom="8dp"
+                        tools:ignore="HardcodedText" />
 
                     <Button
                         android:id="@+id/scanButtonContainer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:textSize="30sp"
                         android:text="Value"
-                        tools:ignore="HardcodedText,VisualLintOverlap" />
+                        tools:ignore="HardcodedText" />
 
                     <TextView
                         android:id="@+id/emptyPlace"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text=""
-                        android:visibility="invisible"
-                        android:textSize="15sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="30dp"
                         android:gravity="center"
-                        android:layout_marginStart="30dp"
-                        android:layout_marginEnd="30dp"
-                        tools:ignore="HardcodedText,MissingConstraints" />
+                        tools:ignore="HardcodedText" />
 
                 </LinearLayout>
 
@@ -72,7 +71,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginTop="8dp"
                     android:gravity="center"
                     android:visibility="gone">
 
@@ -81,71 +79,32 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Scan sample's QR code"
-                        android:visibility="invisible"
-                        android:textSize="20sp"
+                        android:textSize="40sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginStart="15dp"
-                        tools:ignore="HardcodedText,MissingConstraints" />
+                        android:gravity="center"
+                        android:layout_marginBottom="8dp"
+                        tools:ignore="HardcodedText" />
 
                     <Button
                         android:id="@+id/scanButtonSample"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:visibility="invisible"
                         android:text="Value"
-                        android:layout_marginTop="16dp"
-                        tools:ignore="HardcodedText,MissingConstraints" />
+                        android:textSize="30sp"
+                        android:gravity="center"
+                        android:layout_marginBottom="16dp"
+                        tools:ignore="HardcodedText" />
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
 
-    <!-- QR Scanner Layout (overlaid and initially hidden) -->
-    <LinearLayout
+    <!-- Include the QR scanner layout -->
+    <include
+        layout="@layout/scanner_layout"
         android:id="@+id/scanLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="gone"
-        android:background="#80000000"> <!-- Semi-transparent background -->
-
-    <androidx.camera.view.PreviewView
-        android:id="@+id/previewView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"
-        tools:ignore="MissingClass,MissingConstraints" />
-
-    <Button
-        android:id="@+id/flashlightButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="toggleFlashlight"
-        android:visibility="invisible"
-        android:text="light"
-        tools:ignore="HardcodedText,MissingConstraints,OnClick,TextContrastCheck" />
-
-    <Button
-        android:id="@+id/noneButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="15dp"
-        android:text="set as None"
-        tools:ignore="HardcodedText,MissingConstraints,OnClick,TextContrastCheck" />
-
-    <TextView
-        android:id="@+id/scanStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="18sp"
-        android:gravity="center"
-        android:textStyle="bold"
-        tools:ignore="MissingConstraints" />
-    </LinearLayout>
+        android:layout_marginBottom="16dp"/>
 
 </FrameLayout>

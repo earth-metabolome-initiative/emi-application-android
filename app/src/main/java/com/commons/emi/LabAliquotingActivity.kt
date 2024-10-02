@@ -10,6 +10,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -50,7 +51,7 @@ class LabAliquotingActivity : BaseActivity() {
     
     private lateinit var scanLayout: View
     private lateinit var previewView: PreviewView
-    private lateinit var flashlightButton: Button
+    private lateinit var flashlightButton: ImageButton
     private lateinit var scanStatus: TextView
 
     // Define variables
@@ -326,7 +327,7 @@ class LabAliquotingActivity : BaseActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val containerModel = DatabaseManager.getContainerModel(container)
             val aliquotModel = DatabaseManager.getContainerModel(aliquot)
-            val isPairLegal = DatabaseManager.checkContainerHierarchy(container, containerModel, aliquotModel)
+            val isPairLegal = DatabaseManager.checkContainerHierarchy(containerModel, aliquotModel)
             if (isPairLegal) {
                 val extract = scanButtonAliquot.text.toString()
                 val containerId = DatabaseManager.getPrimaryKey(container)

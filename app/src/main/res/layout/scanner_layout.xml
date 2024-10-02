@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scanLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="gone"
+    android:background="#90FFFFFF"
+    android:padding="0dp"
+    android:gravity="center">
+
+    <!-- ScrollView to contain the main content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        tools:ignore="UselessParent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- Top part displaying the scanStatus -->
+            <TextView
+                android:id="@+id/scanStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="40sp"
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:layout_marginBottom="30dp"
+                android:layout_gravity="center" />
+
+            <!-- Middle part with PreviewView and ImageButtons -->
+            <FrameLayout
+                android:layout_width="345dp"
+                android:layout_height="345dp"
+                android:layout_gravity="center">
+
+                <!-- Camera preview -->
+                <androidx.camera.view.PreviewView
+                    android:id="@+id/previewView"
+                    android:layout_width="300dp"
+                    android:layout_height="300dp"
+                    android:layout_gravity="center"
+                    android:background="#DDDDDD" />
+
+                <!-- Close button in the top-right corner -->
+                <ImageButton
+                    android:id="@+id/closeButton"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="top|end"
+                    android:foregroundGravity="center"
+                    android:contentDescription="Close scanner"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:background="@drawable/close_button_background"
+                    android:layout_margin="5dp"
+                    tools:ignore="HardcodedText" />
+
+                <!-- Flashlight button in the top-left corner -->
+                <ImageButton
+                    android:id="@+id/flashlightButton"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="top|start"
+                    android:contentDescription="activate or deactivate flashlight"
+                    android:foregroundGravity="center"
+                    android:src="@drawable/flash_off"
+                    android:background="@drawable/flashlight_button_background"
+                    android:layout_margin="5dp"
+                    tools:ignore="HardcodedText" />
+            </FrameLayout>
+
+            <!-- Bottom part with the noneButton -->
+            <Button
+                android:id="@+id/noneButton"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:textSize="40sp"
+                android:text="Set None"
+                android:visibility="gone"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

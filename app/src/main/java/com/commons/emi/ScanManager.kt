@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.widget.Button
+import android.widget.ImageButton
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.Camera
@@ -33,7 +34,7 @@ object ScanManager{
     private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var camera: Camera
     private lateinit var scanner: BarcodeScanner
-    private var flashlightButton: Button? = null
+    private var flashlightButton: ImageButton? = null
     private var noneButton: Button? = null
 
     private lateinit var cameraExecutor: ExecutorService
@@ -43,7 +44,7 @@ object ScanManager{
     private lateinit var sharedPreferences: SharedPreferences
 
     // Modify initialize function to return the scanned value
-    fun initialize(context: Context, previewView: PreviewView, flashlightButton: Button, noneButton: Button? = null, callback: (String) -> Unit) {
+    fun initialize(context: Context, previewView: PreviewView, flashlightButton: ImageButton, noneButton: Button? = null, callback: (String) -> Unit) {
         this.previewView = previewView
         cameraExecutor = Executors.newSingleThreadExecutor()
         scanner = createBarcodeScanner()
@@ -167,6 +168,7 @@ object ScanManager{
     // Function to turn on the flashlight
     @SuppressLint("SetTextI18n")
     private fun turnOnFlashlight() {
+        this.flashlightButton?.setImageResource(R.drawable.flash_on)
         isFlashlightOn = true
 
         try {
@@ -186,6 +188,7 @@ object ScanManager{
     // Function to turn off the flashlight
     @SuppressLint("SetTextI18n")
     private fun turnOffFlashlight() {
+        this.flashlightButton?.setImageResource(R.drawable.flash_off)
         isFlashlightOn = false
         try {
             camera.cameraControl.enableTorch(false)
