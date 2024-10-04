@@ -142,17 +142,180 @@ object DatabaseManager {
         }
     }
 
-    suspend fun checkContainer(container: String): Int = withContext(Dispatchers.IO) {
+    suspend fun getContainerIdIfValid(container: String, isSampleContainer: Boolean): Int = withContext(Dispatchers.IO) {
         try {
             val result: Int
 
-            // support old container names to avoid changing all labels
             val collectionUrl = if (container.matches(Regex("^container_\\dx\\d_\\d{6}\$")) || container == "absent") {
                 "${getInstance()}/items/Containers?filter[old_id][_eq]=$container&&limit=1"
             } else {
                 "${getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
             }
-            Log.d("ContainerManager", "url: $collectionUrl")
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val id = firstItem.optInt("id")
+                        val isFinite = firstItem.optBoolean("is_finite")
+                        val columns = firstItem.optInt("columns")
+                        val rows = firstItem.optInt("rows")
+                        if (isSampleContainer) {
+                            result = if (isFinite) {
+                                // Check if columns and rows are valid
+                                val capacity = columns * rows
+                                if (capacity == 1) {
+                                    id
+                                } else {
+                                    -1
+                                }
+                            } else {
+                                -1
+                            }
+                        } else {
+                            if (isFinite) {
+                                // Check if columns and rows are valid
+                                val capacity = columns * rows
+                                result = if (capacity > 1) {
+                                    id
+                                } else {
+                                    -1
+                                }
+                            } else {
+                                result = id
+                            }
+                        }
+                    } else {
+                        result = -3 // no data found
+                    }
+                } else {
+                    result = -4 //response body null
+                }
+            } else {
+                result = -5// non 200 response
+            }
+            result
+        } catch (e: IOException) {
+            -6 // internet or other errors
+        }
+    }
+
+    suspend fun getContainerModelId(containerId: Int): Int = withContext(Dispatchers.IO) {
+        try {
+            val result: Int
+
+            val collectionUrl = "${getInstance()}/items/Containers?filter[id][_eq]=$containerId&&limit=1"
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val containerModel = firstItem.optInt("container_model")
+                        result = containerModel
+                        result
+                    } else {
+                        result = -2 // no data found
+                        result
+                    }
+                } else {
+                    result = -3 //response body null
+                    result
+                }
+            } else {
+                -4// non 200 response
+            }
+        } catch (e: IOException) {
+            -5 // internet or other errors
+        }
+    }
+
+    suspend fun getBatchIdIfValid(batch: String, type: String): Int = withContext(Dispatchers.IO) {
+        try {
+            val result: Int
+
+            val batchType: Int = when (type) {
+                "dried_samples" -> 7
+                "extracts" -> 5
+                "aliquots" -> 8
+                else -> 0
+            }
+
+            val collectionUrl = "${getInstance()}/items/Batches?filter[batch_id][_eq]=$batch&&limit=1"
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val typeBatch = firstItem.optInt("batch_type")
+                        if (typeBatch == batchType) {
+                            val id = firstItem.optInt("id")
+                            id
+
+                        } else {
+                            result = -1 // batch is not of good type
+                            result
+                        }
+                    } else {
+                        result = -2 // no data found
+                        result
+                    }
+                } else {
+                    result = -3 //response body null
+                    result
+                }
+            } else {
+                -4// non 200 response
+            }
+        } catch (e: IOException) {
+            -5 // internet or other errors
+        }
+    }
+
+    suspend fun checkContainerLoad(containerId: Int): Int = withContext(Dispatchers.IO) {
+        try {
+            val result: Int
+
+            // support old container names to avoid changing all labels
+            val collectionUrl = "${getInstance()}/items/Containers?filter[id][_eq]=$containerId&&limit=1"
 
             val client = OkHttpClient()
             val request = Request.Builder()
@@ -209,62 +372,6 @@ object DatabaseManager {
             }
         } catch (e: IOException) {
             -7 // internet or other errors
-        }
-    }
-
-    suspend fun checkBatch(batch: String, type: String): Int = withContext(Dispatchers.IO) {
-        try {
-            val result: Int
-
-            val batchType: Int = when (type) {
-                "samples" -> 7
-                "extracts" -> 5
-                "aliquots" -> 8
-                else -> 0
-            }
-
-            // support old container names to avoid changing all labels
-            val collectionUrl = "${getInstance()}/items/Batches?filter[batch_id][_eq]=$batch&&limit=1"
-
-            val client = OkHttpClient()
-            val request = Request.Builder()
-                .addHeader("Accept", "application/json")
-                .url(collectionUrl)
-                .build()
-
-            val response = client.newCall(request).execute()
-            if (response.code == HttpURLConnection.HTTP_OK) {
-                val responseBody = response.body?.string()
-
-                // Check if response body is not null and parse it
-                if (responseBody != null) {
-                    val jsonObject = JSONObject(responseBody)
-                    val dataArray = jsonObject.getJSONArray("data")
-
-                    if (dataArray.length() > 0) {
-                        val firstItem = dataArray.getJSONObject(0)
-                        val typeBatch = firstItem.optInt("batch_type")
-                        if (typeBatch == batchType) {
-                            val id = firstItem.optInt("id")
-                            id
-
-                        } else {
-                            result = -1 // batch is not of good type
-                            result
-                        }
-                    } else {
-                        result = -2 // no data found
-                        result
-                    }
-                } else {
-                    result = -3 //response body null
-                    result
-                }
-            } else {
-                -4// non 200 response
-            }
-        } catch (e: IOException) {
-            -5 // internet or other errors
         }
     }
 
@@ -340,52 +447,6 @@ object DatabaseManager {
         }
     }
 
-    suspend fun getPrimaryKey(container: String): Int = withContext(Dispatchers.IO) {
-        try {
-            val result: Int
-
-            val collectionUrl = if (container.matches(Regex("^container_\\dx\\d_\\d{6}\$")) || container == "absent") {
-                "${getInstance()}/items/Containers?filter[old_id][_eq]=$container&&limit=1"
-            } else {
-                "${getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
-            }
-
-            val client = OkHttpClient()
-            val request = Request.Builder()
-                .addHeader("Accept", "application/json")
-                .url(collectionUrl)
-                .build()
-
-            val response = client.newCall(request).execute()
-            if (response.code == HttpURLConnection.HTTP_OK) {
-                val responseBody = response.body?.string()
-
-                // Check if response body is not null and parse it
-                if (responseBody != null) {
-                    val jsonObject = JSONObject(responseBody)
-                    val dataArray = jsonObject.getJSONArray("data")
-
-                    if (dataArray.length() > 0) {
-                        val firstItem = dataArray.getJSONObject(0)
-                        val id = firstItem.optInt("id")
-                        result = id
-                        result
-                    } else {
-                        result = -2 // no data found
-                        result
-                    }
-                } else {
-                    result = -3 //response body null
-                    result
-                }
-            } else {
-                -4// non 200 response
-            }
-        } catch (e: IOException) {
-            -5 // internet or other errors
-        }
-    }
-
     suspend fun getExtractionDataPrimaryKey(extactId: Int): Int = withContext(Dispatchers.IO) {
         try {
             val id: Int
@@ -431,15 +492,11 @@ object DatabaseManager {
         }
     }
 
-    suspend fun getContainerModel(container: String): Int = withContext(Dispatchers.IO) {
+    suspend fun getContainerType(containerTypeId: Int): String = withContext(Dispatchers.IO) {
         try {
-            val result: Int
+            val result: String
 
-            val collectionUrl = if (container.matches(Regex("^container_\\dx\\d_\\d{6}\$")) || container == "absent") {
-                "${getInstance()}/items/Containers?filter[old_id][_eq]=$container&&limit=1"
-            } else {
-                "${getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
-            }
+            val collectionUrl = "${getInstance()}/items/Container_Types?filter[id][_eq]=$containerTypeId&&limit=1"
 
             val client = OkHttpClient()
             val request = Request.Builder()
@@ -458,22 +515,106 @@ object DatabaseManager {
 
                     if (dataArray.length() > 0) {
                         val firstItem = dataArray.getJSONObject(0)
-                        val containerModel = firstItem.optInt("container_model")
-                        result = containerModel
+                        val containerType = firstItem.optString("container_type")
+                        result = containerType
                         result
                     } else {
-                        result = -2 // no data found
+                        result = "no_data" // no data found
                         result
                     }
                 } else {
-                    result = -3 //response body null
+                    result = "null" //response body null
                     result
                 }
             } else {
-                -4// non 200 response
+                "non_200"// non 200 response
             }
         } catch (e: IOException) {
-            -5 // internet or other errors
+            "internet" // internet or other errors
+        }
+    }
+
+    suspend fun getUnit(unitId: Int): String = withContext(Dispatchers.IO) {
+        try {
+            val result: String
+
+            val collectionUrl = "${getInstance()}/items/SI_Units?filter[id][_eq]=$unitId&&limit=1"
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val symbol = firstItem.optString("symbol")
+                        result = symbol
+                        result
+                    } else {
+                        result = "no_data" // no data found
+                        result
+                    }
+                } else {
+                    result = "null" //response body null
+                    result
+                }
+            } else {
+                "non_200"// non 200 response
+            }
+        } catch (e: IOException) {
+            "internet" // internet or other errors
+        }
+    }
+
+    suspend fun getBrand(brandId: Int): String = withContext(Dispatchers.IO) {
+        try {
+            val result: String
+
+            val collectionUrl = "${getInstance()}/items/SI_Units?filter[id][_eq]=$brandId&&limit=1"
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val brand = firstItem.optString("brand")
+                        result = brand
+                        result
+                    } else {
+                        result = "no_data" // no data found
+                        result
+                    }
+                } else {
+                    result = "null" //response body null
+                    result
+                }
+            } else {
+                "non_200"// non 200 response
+            }
+        } catch (e: IOException) {
+            "internet" // internet or other errors
         }
     }
 

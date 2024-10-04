@@ -257,7 +257,7 @@ class LabAliquotingActivity : BaseActivity() {
 
                 if (isContainerScanActive) {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val places = DatabaseManager.checkContainer(scanButtonContainer.text.toString())
+                        val places = DatabaseManager.checkContainerLoad(scanButtonContainer.text.toString().toInt())
                         withContext(Dispatchers.Main) {
                             handleContainerScan(places)
                         }
@@ -335,12 +335,12 @@ class LabAliquotingActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     fun handleObjectScan(container: String, aliquot: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            val containerModel = DatabaseManager.getContainerModel(container)
-            val aliquotModel = DatabaseManager.getContainerModel(aliquot)
+            val containerModel = DatabaseManager.getContainerModelId(container.toInt())
+            val aliquotModel = DatabaseManager.getContainerModelId(aliquot.toInt())
             val isPairLegal = DatabaseManager.checkContainerHierarchy(containerModel, aliquotModel)
             if (isPairLegal) {
                 val extract = scanButtonAliquot.text.toString()
-                val containerId = DatabaseManager.getPrimaryKey(container)
+                val containerId = DatabaseManager.getContainerIdIfValid(container, false)
                 val volume = aliquotVolume.text.toString().toDouble()
                 withContext(Dispatchers.IO) {
                     sendDataToDirectus(
@@ -364,7 +364,7 @@ class LabAliquotingActivity : BaseActivity() {
     private suspend fun sendDataToDirectus(extract: String, volume: Double, volumeUnit: Int, containerId: Int) {
         // Define the table url
         val aliquot = checkExistenceInDirectus(extract)
-        val extractId = DatabaseManager.getPrimaryKey(extract)
+        val extractId = DatabaseManager.getContainerIdIfValid(extract, true)
 
         if (aliquot != null) {
 

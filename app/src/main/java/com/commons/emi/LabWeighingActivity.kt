@@ -2,9 +2,16 @@ package com.commons.emi
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
+import android.text.SpannableString
 import android.text.TextWatcher
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
@@ -25,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -48,6 +56,11 @@ class LabWeighingActivity : BaseActivity() {
     private lateinit var targetWeightInput: EditText
     private lateinit var targetWeightTolerance: EditText
 
+    private lateinit var sampleContainerLayout: View
+    private lateinit var textSampleContainer: TextView
+    private lateinit var textNewSampleContainer: TextView
+    private lateinit var containerModelSpinner: Spinner
+
     private lateinit var sampleLayout: View
     private lateinit var scanSampleLabel: TextView
     private lateinit var scanButtonSample: Button
@@ -67,13 +80,18 @@ class LabWeighingActivity : BaseActivity() {
     private var choices: List<String> = mutableListOf("choose a unit")
     private var multiplication: String = ""
     private var unitId: Int = 0
+    private var sampleContainerId: Int = 0
+    private var sampleContainer: String = ""
+    private var sampleContainerModelId: Int = 0
+    private var weight: Double = 0.0
 
     // Trackers
     private var isUnitSelected = false
-    private var isConstraintActive = true
+    private var isConstraintActive = false
     private var isConstraintValid = false
     private var isTargetWeightInputFilled = false
     private var isTargetWeightToleranceFilled = false
+    private var isContainerModelFilled = false
     private var isObjectScanActive = false
     private var isQrScannerActive = false
     private var isObjectValid = false
@@ -103,6 +121,11 @@ class LabWeighingActivity : BaseActivity() {
         targetWeightInput = findViewById(R.id.targetWeightInput)
         targetWeightTolerance = findViewById(R.id.targetWeightTolerance)
 
+        sampleContainerLayout = findViewById(R.id.sampleContainerLayout)
+        textSampleContainer = findViewById(R.id.textSampleContainer)
+        textNewSampleContainer = findViewById(R.id.textNewSampleContainer)
+        containerModelSpinner = findViewById(R.id.containerModelSpinner)
+
         sampleLayout = findViewById(R.id.sampleLayout)
         scanSampleLabel = findViewById(R.id.scanSampleLabel)
         scanButtonSample = findViewById(R.id.scanButtonSample)
@@ -119,19 +142,21 @@ class LabWeighingActivity : BaseActivity() {
         scanStatus = findViewById(R.id.scanStatus)
 
         // Fetch extraction methods and populate the extraction method spinner.
-        fetchValuesAndPopulateSpinner()
-
-        // Set the checkbox as checked by default
-        tickCheckBox.isChecked = true
+        fetchValuesAndPopulateUnitSpinner()
 
         tickCheckBox.setOnCheckedChangeListener { _, isChecked ->
             // Do something with the ticked state
             if (isChecked) {
                 isConstraintActive = true
+                isConstraintValid = false
                 visibilityManager()
 
             } else {
                 isConstraintActive = false
+                targetWeightInput.text = null
+                targetWeightTolerance.text = null
+                infoLabel.text = ""
+                isConstraintValid = true
                 visibilityManager()
             }
         }
@@ -160,11 +185,31 @@ class LabWeighingActivity : BaseActivity() {
             }
         })
 
+        // Fetch container models and populate the container models spinner.
+        fetchValuesAndPopulateContainerModelsSpinner()
+
+        // Make the link clickable for information text to create a new container model.
+        val linkTextView: TextView = textNewSampleContainer
+        val spannableString = SpannableString(linkTextView.text)
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                val url = "${DatabaseManager.getInstance()}/admin/content/Container_Models/+"
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(browserIntent)
+            }
+        }
+        Log.d("Spannable", "spannable: $spannableString, length: ${spannableString.length}")
+        spannableString.setSpan(clickableSpan, 0, spannableString.length, spannableString.length)
+        linkTextView.text = spannableString
+        linkTextView.movementMethod = LinkMovementMethod.getInstance()
+
         // Set up button click listener for Object QR Scanner
         scanButtonSample.setOnClickListener {
+            // Hide keyboard
             val inputMethodManager =
                 getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(targetWeightInput.windowToken, 0)
+
             isObjectScanActive = true
             isQrScannerActive = true
             visibilityManager()
@@ -173,15 +218,10 @@ class LabWeighingActivity : BaseActivity() {
                 // Stop the scanning process after receiving the result
                 ScanManager.stopScanning()
                 isQrScannerActive = false
-                isObjectValid = true
                 visibilityManager()
-                weightInput.postDelayed({
-                    weightInput.requestFocus()
-                    showKeyboard()
-                }, 200)
-                weightInput.text = null
-                scanStatus.text = ""
+                scanButtonSample.textSize = 25f
                 scanButtonSample.text = scannedSample
+                manageScan()
             }
         }
 
@@ -214,18 +254,15 @@ class LabWeighingActivity : BaseActivity() {
         })
 
         submitButton.setOnClickListener {
+            weight = weightInput.text.toString().toDouble()
             submitButton.visibility= View.GONE
-            val inputText = weightInput.text.toString()
-            val inputNumber = inputText.toFloatOrNull()
-            val unit = unitId
             CoroutineScope(Dispatchers.IO).launch {
-                sendDataToDirectus(scanButtonSample.text.toString(), inputNumber.toString(), unit)
+                sendDataToDirectus()
             }
         }
     }
 
-    // Function to obtain extraction methods from directus and to populate the spinner.
-    private fun fetchValuesAndPopulateSpinner() {
+    private fun fetchValuesAndPopulateUnitSpinner() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val collectionUrl =
@@ -287,18 +324,21 @@ class LabWeighingActivity : BaseActivity() {
                                 ) {
                                     if (position > 0) {
                                         isUnitSelected = true
+                                        isConstraintActive = true
                                         visibilityManager()
                                         val unit = unitSpinner.selectedItem.toString()
                                         multiplication = multiplications[unit].toString()
                                         unitId = ids[unit].toString().toInt()
                                     } else {
                                         isUnitSelected = false
+                                        isConstraintActive = false
                                         visibilityManager()
                                     }
                                 }
 
                                 override fun onNothingSelected(parent: AdapterView<*>?) {
                                     isUnitSelected = false
+                                    isConstraintActive = false
                                     visibilityManager()
                                 }
                             }
@@ -322,22 +362,146 @@ class LabWeighingActivity : BaseActivity() {
             val target = targetWeightInput.text.toString()
             val correctedTarget = target.toInt()*multiplication.toDouble()
             if (correctedTarget <= 0.00001) {
-                infoLabel.text = "Advised extraction setup: 1 metal bead, 500µl solvent"
+                infoLabel.text = "Advised extraction setup:\n- 1 metal bead\n- 500µl solvent"
             } else if (correctedTarget in 0.000011..0.00003) {
-                infoLabel.text = "Advised extraction setup: 2 metal beads, 1000µl solvent"
+                infoLabel.text = "Advised extraction setup:\n- 2 metal beads\n- 1000µl solvent"
             } else if (correctedTarget in 0.000031..0.00005) {
-                infoLabel.text = "Advised extraction setup: 3 metal beads, 1500µl solvent"
+                infoLabel.text = "Advised extraction setup:\n- 3 metal beads\n- 1500µl solvent"
             } else {
                 infoLabel.text = "No advised extraction setup."
             }
 
         } else {
+            infoLabel.text = ""
             isConstraintValid = false
-            visibilityManager()
+        }
+    }
+
+    // Function to obtain extraction methods from directus and to populate the spinner.
+    private fun fetchValuesAndPopulateContainerModelsSpinner() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val collectionUrl =
+                    "${DatabaseManager.getInstance()}/items/Container_Models"
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .addHeader("Accept", "application/json")
+                    .url(collectionUrl)
+                    .build()
+
+                val response = client.newCall(request).execute()
+                if (response.code == HttpURLConnection.HTTP_OK) {
+                    val responseBody = response.body?.string()
+
+                    val jsonObject = responseBody?.let { JSONObject(it) }
+                    val dataArray = jsonObject?.getJSONArray("data")
+
+                    val values = ArrayList<String>()
+                    val ids = HashMap<String, Int>()
+
+                    // Add "Choose an option" to the list of values
+                    values.add("Choose a sample container model")
+
+                    if (dataArray != null) {
+                        for (i in 0 until dataArray.length()) {
+                            val item = dataArray.getJSONObject(i)
+                            val containerTypeId = item.optInt("container_type")
+                            val containerType = DatabaseManager.getContainerType(containerTypeId)
+                            val volume = item.optDouble("volume")
+                            val volumeUnitId = item.optInt("volume_unit")
+                            val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
+                            val brandId = item.optInt("brand")
+                            val brand = DatabaseManager.getBrand(brandId)
+                            val value = "$containerType $volume $volumeUnit $brand"
+                            val id = item.optInt("id")
+                            if (volume > 0 && volumeUnit != "pcs") {
+                                values.add(value)
+                                ids[value] = id
+                            }
+                        }
+                    }
+
+                    runOnUiThread {
+                        // Populate spinner with values
+                        choices = values // Update choices list
+                        val adapter = ArrayAdapter(
+                            this@LabWeighingActivity,
+                            R.layout.spinner_list,
+                            values
+                        )
+                        adapter.setDropDownViewResource(R.layout.spinner_list)
+                        containerModelSpinner.adapter = adapter
+
+                        // Add an OnItemSelectedListener to update newExtractionMethod text and handle visibility
+                        containerModelSpinner.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                @SuppressLint("SetTextI18n")
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+                                    if (position > 0) { // Check if a valid option (not "Choose an option") is selected
+                                        val selectedValue = values[position]
+                                        sampleContainerModelId = ids[selectedValue].toString().toInt()
+                                        isContainerModelFilled = true
+                                        visibilityManager()
+                                    } else {
+                                        isContainerModelFilled = false
+                                        visibilityManager()
+                                    }
+                                }
+
+                                @SuppressLint("SetTextI18n")
+                                override fun onNothingSelected(parent: AdapterView<*>?) {
+                                    isContainerModelFilled = false
+                                    visibilityManager()
+                                }
+                            }
+                    }
+                } else {
+                    showToast("Connection error")
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                showToast("$e")
+            }
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun manageScan() {
+        if (isObjectScanActive) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val sample = scanButtonSample.text.toString()
+                sampleContainerId = DatabaseManager.getContainerIdIfValid(sample, true)
+                if (sampleContainerId > 0) {
+                    scanButtonSample.setTextColor(Color.WHITE)
+                    sampleContainerModelId = DatabaseManager.getContainerModelId(sampleContainerId)
+                    sampleContainer = sample
+                    isObjectValid = true
+                    visibilityManager()
+
+                    // show keyboard
+                    weightInput.postDelayed({
+                        weightInput.requestFocus()
+                        showKeyboard()
+                    }, 200)
+                    weightInput.text = null
+                } else {
+                    withContext(Dispatchers.Main) {
+                        scanButtonSample.setTextColor(Color.RED)
+                        scanButtonSample.text = "Invalid sample"
+                    }
+                }
+            }
         }
     }
 
     // Function that permits to control which extracts are already in the database and increment by one to create a unique one
+    @SuppressLint("DefaultLocale")
     private fun checkExistenceInDirectus(sampleId: String): String? {
         for (i in 1..99) {
             val testId = "${sampleId}_${String.format("%02d", i)}"
@@ -374,10 +538,9 @@ class LabWeighingActivity : BaseActivity() {
 
     // Function to send data to Directus
     @SuppressLint("DiscouragedApi")
-    suspend fun sendDataToDirectus(sampleId: String, weight: String, unit: Int) {
+    suspend fun sendDataToDirectus() {
         // Define the table url
-        val extractId = checkExistenceInDirectus(sampleId)
-        val sampleKey = DatabaseManager.getPrimaryKey(sampleId)
+        val extractId = checkExistenceInDirectus(submitButton.text.toString())
 
         if (extractId != null) {
 
@@ -390,7 +553,6 @@ class LabWeighingActivity : BaseActivity() {
 
                 val jsonBody = JSONObject().apply {
                     put("container_id", extractId)
-                    put("container_model", 5) // TODO implement container model choice
                     put("status", "present")
                     put("reserved", true)
                     put("used", true)
@@ -430,10 +592,11 @@ class LabWeighingActivity : BaseActivity() {
 
                             val jsonBodyExt = JSONObject().apply {
                                 put("sample_container", id)
-                                put("parent_sample_container", sampleKey)
+                                put("parent_sample_container", sampleContainerId)
                                 put("status", "present")
                                 put("dried_weight", weight)
-                                put("dried_weight_unit", unit)
+                                put("extraction_container", sampleContainerModelId)
+                                put("dried_weight_unit", unitId)
                             }
 
                             val requestBodyExt = jsonBodyExt.toString()
@@ -454,7 +617,7 @@ class LabWeighingActivity : BaseActivity() {
                                 printLabel(extractId)
                                 // Start a coroutine to delay the next scan by 5 seconds
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    delay(1500)
+                                    delay(2000)
                                     scanButtonSample.performClick()
                                 }
                             } else {
@@ -468,7 +631,7 @@ class LabWeighingActivity : BaseActivity() {
                         }
 
                     } else {
-                        showToast("Error, $sampleId seems to be absent from the database.")
+                        showToast("Error, $sampleContainer seems to be absent from the database.")
                     }
             } catch (e: IOException) {
                 showToast("Error: $e")
@@ -539,36 +702,42 @@ class LabWeighingActivity : BaseActivity() {
     }
 
     private fun visibilityManager () {
-        if (isUnitSelected) {
-            tickLayout.visibility = View.VISIBLE
-        } else {
-            tickLayout.visibility = View.GONE
-        }
-        if (isConstraintActive) {
-            constraintLayout.visibility = View.VISIBLE
-        } else {
-            constraintLayout.visibility = View.GONE
-            isConstraintValid = true
-        }
-        if (isConstraintValid) {
-            sampleLayout.visibility = View.VISIBLE
-        } else {
-            sampleLayout.visibility = View.VISIBLE
-        }
-        if (isQrScannerActive) {
-            scanLayout.visibility = View.VISIBLE
-        } else {
-            scanLayout.visibility = View.GONE
-        }
-        if (isObjectScanActive) {
-            constraintLayout.visibility = View.GONE
-        } else {
-            constraintLayout.visibility = View.VISIBLE
-        }
-        if (isObjectValid) {
-            weightLayout.visibility = View.VISIBLE
-        } else {
-            weightLayout.visibility = View.GONE
+        runOnUiThread {
+            if (isUnitSelected) {
+                tickLayout.visibility = View.VISIBLE
+            } else {
+                tickLayout.visibility = View.GONE
+
+            }
+            if (isConstraintActive) {
+                constraintLayout.visibility = View.VISIBLE
+            } else {
+                constraintLayout.visibility = View.GONE
+            }
+            if (isConstraintValid) {
+                sampleContainerLayout.visibility = View.VISIBLE
+            } else {
+                sampleContainerLayout.visibility = View.GONE
+            }
+            if (isContainerModelFilled) {
+                sampleLayout.visibility = View.VISIBLE
+            } else {
+                sampleLayout.visibility = View.GONE
+            }
+            if (isQrScannerActive) {
+                scanLayout.visibility = View.VISIBLE
+            } else {
+                scanLayout.visibility = View.GONE
+            }
+            if (isObjectScanActive) {
+                tickLayout.visibility = View.GONE
+                constraintLayout.visibility = View.GONE
+            }
+            if (isObjectValid) {
+                weightLayout.visibility = View.VISIBLE
+            } else {
+                weightLayout.visibility = View.GONE
+            }
         }
     }
 

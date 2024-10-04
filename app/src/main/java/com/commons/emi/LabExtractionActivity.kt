@@ -40,7 +40,6 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
 
-@Suppress("DEPRECATION")
 class LabExtractionActivity : BaseActivity() {
 
     // Initialize views
@@ -66,6 +65,11 @@ class LabExtractionActivity : BaseActivity() {
     private lateinit var scanButtonContainer: Button
     private lateinit var containerEmptyPlace: TextView
 
+    private lateinit var sampleContainerLayout: View
+    private lateinit var textSampleContainer: TextView
+    private lateinit var textNewSampleContainer: TextView
+    private lateinit var containerModelSpinner: Spinner
+
     private lateinit var extractLayout: View
     private lateinit var textScanButtonExtract: TextView
     private lateinit var scanButtonExtract: Button
@@ -84,6 +88,10 @@ class LabExtractionActivity : BaseActivity() {
     private var unit: String = ""
     private var methodId: Int = 0
     private var method: String = ""
+    private var sampleContainerModelId: Int = 0
+    private var sampleContainerId: Int = 0
+    private var containerModelId: Int = 0
+    private var containerId: Int = 0
     private var batchId: Int = 0
 
     // Define trackers
@@ -95,6 +103,7 @@ class LabExtractionActivity : BaseActivity() {
     private var isBatchValid = false
     private var isContainerScanActive = false
     private var isContainerValid = false
+    private var isContainerModelFilled = false
     private var isObjectScanActive = false
     private var isObjectValid = false
 
@@ -107,7 +116,7 @@ class LabExtractionActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        checkPrinterConnection()
+        //checkPrinterConnection()
 
         title = "Extraction screen"
 
@@ -134,6 +143,11 @@ class LabExtractionActivity : BaseActivity() {
         textScanButtonBatch = findViewById(R.id.textScanButtonBatch)
         scanButtonBatch = findViewById(R.id.scanButtonBatch)
 
+        sampleContainerLayout = findViewById(R.id.sampleContainerLayout)
+        textSampleContainer = findViewById(R.id.textSampleContainer)
+        textNewSampleContainer = findViewById(R.id.textNewSampleContainer)
+        containerModelSpinner = findViewById(R.id.containerModelSpinner)
+
         extractLayout = findViewById(R.id.extractLayout)
         textScanButtonExtract = findViewById(R.id.textScanButtonExtract)
         scanButtonExtract = findViewById(R.id.scanButtonExtract)
@@ -156,7 +170,7 @@ class LabExtractionActivity : BaseActivity() {
                 startActivity(browserIntent)
             }
         }
-        spannableString.setSpan(clickableSpan, 56, 60, spannableString.length)
+        spannableString.setSpan(clickableSpan, 0, spannableString.length, spannableString.length)
         linkTextView.text = spannableString
         linkTextView.movementMethod = LinkMovementMethod.getInstance()
 
@@ -200,6 +214,7 @@ class LabExtractionActivity : BaseActivity() {
                 ScanManager.stopScanning()
                 isQrScannerActive = false
                 visibilityManager()
+                scanButtonBatch.textSize = 25f
                 scanButtonBatch.text = scannedBatch
                 manageScan()
             }
@@ -207,8 +222,10 @@ class LabExtractionActivity : BaseActivity() {
 
         // Set up button click listener for Container QR Scanner
         scanButtonContainer.setOnClickListener {
+            // hide keyboard
             val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(solventVolume.windowToken, 0)
+
             isContainerScanActive = true
             isObjectScanActive = false
             isBatchActive = false
@@ -222,11 +239,30 @@ class LabExtractionActivity : BaseActivity() {
                 ScanManager.stopScanning()
                 isQrScannerActive = false
                 noneButton.visibility = View.GONE
+                scanButtonContainer.textSize = 25f
                 scanButtonContainer.text = scannedContainer
                 visibilityManager()
                 manageScan()
             }
         }
+
+        // Fetch container models and populate the container models spinner.
+        fetchValuesAndPopulateContainerModelsSpinner()
+
+        // Make the link clickable for information text to create a new container model.
+        val linkTextViewModel: TextView = textNewSampleContainer
+        val spannableStringModel = SpannableString(linkTextViewModel.text)
+        val clickableSpanModel = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                val url = "${DatabaseManager.getInstance()}/admin/content/Container_Models/+"
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(browserIntent)
+            }
+        }
+        Log.d("Spannable", "spannable: $spannableStringModel, length: ${spannableStringModel.length}")
+        spannableStringModel.setSpan(clickableSpanModel, 0, spannableStringModel.length, spannableStringModel.length)
+        linkTextViewModel.text = spannableStringModel
+        linkTextViewModel.movementMethod = LinkMovementMethod.getInstance()
 
         // Set up button click listener for Object QR Scanner
         scanButtonExtract.setOnClickListener {
@@ -242,12 +278,14 @@ class LabExtractionActivity : BaseActivity() {
                 ScanManager.stopScanning()
                 isQrScannerActive = false
                 visibilityManager()
+                scanButtonExtract.textSize = 25f
                 scanButtonExtract.text = scannedSample
                 manageScan()
             }
         }
 
         closeButton.setOnClickListener {
+            ScanManager.stopScanning()
             isQrScannerActive = false
             visibilityManager()
         }
@@ -437,29 +475,127 @@ class LabExtractionActivity : BaseActivity() {
         }
     }
 
-    // Function to store data from QR scanner.
-    @SuppressLint("SetTextI18n", "SuspiciousIndentation")
-    @Deprecated("Deprecated in Java")
-    fun manageScan() {
+    // Function to obtain extraction methods from directus and to populate the spinner.
+    private fun fetchValuesAndPopulateContainerModelsSpinner() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val collectionUrl =
+                    "${DatabaseManager.getInstance()}/items/Container_Models"
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .addHeader("Accept", "application/json")
+                    .url(collectionUrl)
+                    .build()
+
+                val response = client.newCall(request).execute()
+                if (response.code == HttpURLConnection.HTTP_OK) {
+                    val responseBody = response.body?.string()
+
+                    val jsonObject = responseBody?.let { JSONObject(it) }
+                    val dataArray = jsonObject?.getJSONArray("data")
+
+                    val values = ArrayList<String>()
+                    val ids = HashMap<String, Int>()
+
+                    // Add "Choose an option" to the list of values
+                    values.add("Choose a sample container model")
+
+                    if (dataArray != null) {
+                        for (i in 0 until dataArray.length()) {
+                            val item = dataArray.getJSONObject(i)
+                            val containerTypeId = item.optInt("container_type")
+                            val containerType = DatabaseManager.getContainerType(containerTypeId)
+                            val volume = item.optDouble("volume")
+                            val volumeUnitId = item.optInt("volume_unit")
+                            val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
+                            val brandId = item.optInt("brand")
+                            val brand = DatabaseManager.getBrand(brandId)
+                            val value = "$containerType $volume $volumeUnit $brand"
+                            val id = item.optInt("id")
+                            if (volume > 0 && volumeUnit != "pcs") {
+                                values.add(value)
+                                ids[value] = id
+                            }
+                        }
+                    }
+
+                    runOnUiThread {
+                        // Populate spinner with values
+                        choices = values // Update choices list
+                        val adapter = ArrayAdapter(
+                            this@LabExtractionActivity,
+                            R.layout.spinner_list,
+                            values
+                        )
+                        adapter.setDropDownViewResource(R.layout.spinner_list)
+                        containerModelSpinner.adapter = adapter
+
+                        // Add an OnItemSelectedListener to update newExtractionMethod text and handle visibility
+                        containerModelSpinner.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                @SuppressLint("SetTextI18n")
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+                                    if (position > 0) { // Check if a valid option (not "Choose an option") is selected
+                                        val selectedValue = values[position]
+                                        sampleContainerModelId = ids[selectedValue].toString().toInt()
+                                        isContainerModelFilled = true
+                                        visibilityManager()
+                                    } else {
+                                        isContainerModelFilled = false
+                                        visibilityManager()
+                                    }
+                                }
+
+                                @SuppressLint("SetTextI18n")
+                                override fun onNothingSelected(parent: AdapterView<*>?) {
+                                    isContainerModelFilled = false
+                                    visibilityManager()
+                                }
+                            }
+                    }
+                } else {
+                    showToast("Connection error")
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                showToast("$e")
+            }
+        }
+    }
+
+    private fun manageScan() {
         if (isBatchActive) {
             CoroutineScope(Dispatchers.IO).launch {
                 val batch = scanButtonBatch.text.toString()
-                batchId = DatabaseManager.checkBatch(batch, "extracts")
+                batchId = DatabaseManager.getBatchIdIfValid(batch, "extracts")
                 withContext(Dispatchers.Main) {
                     handleBatchScan(batchId, batch)
                 }
             }
         } else if (isContainerScanActive) {
             CoroutineScope(Dispatchers.IO).launch {
-                val places = DatabaseManager.checkContainer(scanButtonContainer.text.toString())
+                containerId = DatabaseManager.getContainerIdIfValid(scanButtonContainer.text.toString(), false)
+                val places = DatabaseManager.checkContainerLoad(containerId)
+                containerModelId = DatabaseManager.getContainerModelId(containerId)
                 withContext(Dispatchers.Main) {
                     handleContainerScan(places)
                 }
             }
         } else if (isObjectScanActive) {
-            val containerId = scanButtonContainer.text.toString()
-            val extractId = scanButtonExtract.text.toString()
-            handleObjectScan(containerId, extractId)
+            CoroutineScope(Dispatchers.IO).launch {
+                val sample = scanButtonExtract.text.toString()
+                sampleContainerId = DatabaseManager.getContainerIdIfValid(sample, true)
+                sampleContainerModelId = DatabaseManager.getContainerModelId(sampleContainerId)
+                withContext(Dispatchers.Main) {
+                    handleObjectScan(sample)
+                }
+            }
         }
     }
 
@@ -501,7 +637,7 @@ class LabExtractionActivity : BaseActivity() {
         isContainerValid = false
         isObjectValid = false
         visibilityManager()
-        showToast("Unknown error, please reopen the application.")
+        showToast("Unknown error, please restart the application.")
     }
 
     private fun handleContainerScan(places: Int) {
@@ -557,21 +693,17 @@ class LabExtractionActivity : BaseActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    fun handleObjectScan(container: String, extract: String) {
+    fun handleObjectScan(extract: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            val containerModel = DatabaseManager.getContainerModel(container)
-            val extractModel = DatabaseManager.getContainerModel(extract)
-            val isPairLegal = DatabaseManager.checkContainerHierarchy(containerModel, extractModel)
+            val isPairLegal = DatabaseManager.checkContainerHierarchy(containerModelId, sampleContainerModelId)
             if (isPairLegal) {
-                val extractId = DatabaseManager.getPrimaryKey(extract)
-                val containerId = DatabaseManager.getPrimaryKey(container)
                 val volume = solventVolume.text.toString().toDouble()
                 withContext(Dispatchers.IO) {
                     sendDataToDirectus(batchId = batchId,
                         containerId = containerId,
                         extract = extract,
                         extractionMethodId = methodId,
-                        extractId = extractId,
+                        extractId = sampleContainerId,
                         solventVolume = volume,
                         solventVolumeUnitId = unitId
                         )
@@ -600,21 +732,14 @@ class LabExtractionActivity : BaseActivity() {
     ) {
         // Perform the PATCH request to add the values on directus
         try {
-            val id = DatabaseManager.getExtractionDataPrimaryKey(extractId)
             // Retrieve primary keys, token and URL
-            showToast("id: $id")
-            val collectionUrl = DatabaseManager.getInstance() + "/items/Extraction_Data/$id"
-            Log.d("LabExtractionActivity", "URL: $collectionUrl")
+            val collectionUrl = "${DatabaseManager.getInstance()}/items/Containers/$extractId"
             val accessToken = DatabaseManager.getAccessToken()
 
             val client = OkHttpClient()
 
             val jsonBody = JSONObject().apply {
-                put("parent_container", containerId)
-                put("solvent_volume", solventVolume)
-                put("solvent_volume_unit", solventVolumeUnitId)
-                put("extraction_method", extractionMethodId)
-                put("batch", batchId)
+                put("container_model", sampleContainerModelId)
             }
 
             val requestBody = jsonBody.toString()
@@ -628,30 +753,57 @@ class LabExtractionActivity : BaseActivity() {
 
             val response = client.newCall(request).execute()
 
-            withContext(Dispatchers.Main) {
+            val responseCode = response.code
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                val id = DatabaseManager.getExtractionDataPrimaryKey(extractId)
+                val collectionUrlExt = DatabaseManager.getInstance() + "/items/Extraction_Data/$id"
 
-                val responseCode = response.code
-                Log.d("LabExtractionActivity", "code: ${response.code}")
-                Log.d("LabExtractionActivity", "message: ${response.message}")
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    // Display a Toast with the response message
-                    showToast("$extract correctly added to database")
+                val clientExt = OkHttpClient()
 
-                    printLabel(extract)
+                val jsonBodyExt = JSONObject().apply {
+                    put("parent_container", containerId)
+                    put("solvent_volume", solventVolume)
+                    put("solvent_volume_unit", solventVolumeUnitId)
+                    put("extraction_method", extractionMethodId)
+                    put("batch", batchId)
+                }
 
-                    // Check if there is still enough place in the container before initiating the QR code reader
-                    val places =
-                        DatabaseManager.checkContainer(scanButtonContainer.text.toString())
-                    handleContainerScan(places)
-                    if (places > 0) {
-                        delay(500)
-                        scanButtonExtract.performClick()
+                val requestBodyExt = jsonBodyExt.toString()
+                    .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+
+                val requestExt = Request.Builder()
+                    .url(collectionUrlExt)
+                    .addHeader("Authorization", "Bearer $accessToken")
+                    .patch(requestBodyExt)
+                    .build()
+
+                val responseExt = clientExt.newCall(requestExt).execute()
+
+                withContext(Dispatchers.Main) {
+
+                    val responseCodeExt = responseExt.code
+                    Log.d("LabExtractionActivity", "code: ${response.code}")
+                    Log.d("LabExtractionActivity", "message: ${response.message}")
+                    if (responseCodeExt == HttpURLConnection.HTTP_OK) {
+                        // Display a Toast with the response message
+                        showToast("$extract correctly added to database")
+
+                        printLabel(extract)
+
+                        // Check if there is still enough place in the container before initiating the QR code reader
+                        val places =
+                            DatabaseManager.checkContainerLoad(containerId)
+                        handleContainerScan(places)
+                        if (places > 0) {
+                            delay(500)
+                            scanButtonExtract.performClick()
+                        }
+                    } else {
+                        containerEmptyPlace.visibility = View.VISIBLE
+                        containerEmptyPlace.setTextColor(Color.RED)
+                        containerEmptyPlace.text =
+                            "Error adding $extract to database."
                     }
-                } else {
-                    containerEmptyPlace.visibility = View.VISIBLE
-                    containerEmptyPlace.setTextColor(Color.RED)
-                    containerEmptyPlace.text =
-                        "Error adding $extract to database."
                 }
             }
         } catch (e: IOException) {
@@ -739,6 +891,11 @@ class LabExtractionActivity : BaseActivity() {
             containerLayout.visibility = View.GONE
         }
         if (isContainerValid) {
+            sampleContainerLayout.visibility = View.VISIBLE
+        } else {
+            sampleContainerLayout.visibility = View.GONE
+        }
+        if (isContainerModelFilled) {
             extractLayout.visibility = View.VISIBLE
             textSummary.visibility = View.VISIBLE
             extractionMethodLayout.visibility = View.GONE
@@ -747,8 +904,6 @@ class LabExtractionActivity : BaseActivity() {
         } else {
             extractLayout.visibility = View.GONE
             textSummary.visibility = View.GONE
-            extractionMethodLayout.visibility = View.VISIBLE
-            volumeLayout.visibility = View.VISIBLE
             textSummary.text = ""
         }
     }

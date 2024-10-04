@@ -31,8 +31,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:gravity="center"
-                    android:visibility="visible">
+                    android:gravity="center">
 
                     <TextView
                         android:id="@+id/unitLabel"
@@ -68,6 +67,7 @@
                         android:layout_height="wrap_content"
                         android:text="Set a weight constraint"
                         android:textSize="30sp"
+                        android:checked="true"
                         android:layout_marginBottom="8dp"
                         tools:ignore="HardcodedText" />
 
@@ -142,12 +142,53 @@
                         android:id="@+id/infoLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="info label"
+                        android:text=""
                         android:gravity="center_horizontal"
-                        android:textSize="40sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="40dp"
                         tools:ignore="HardcodedText" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/sampleContainerLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/textSampleContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select the container where you will perform the extraction"
+                        android:textSize="40sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:layout_marginBottom="8dp"
+                        tools:ignore="HardcodedText" />
+
+                    <TextView
+                        android:id="@+id/textNewSampleContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No suitable container model? Click here to add yours."
+                        android:textSize="15sp"
+                        android:gravity="center"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"
+                        tools:ignore="HardcodedText" />
+
+                    <!-- Spinner for container model -->
+                    <Spinner
+                        android:id="@+id/containerModelSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="40dp"
+                        android:spinnerMode="dropdown"
+                        tools:ignore="TouchTargetSizeCheck" />
 
                 </LinearLayout>
 
