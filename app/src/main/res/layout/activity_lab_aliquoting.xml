@@ -87,7 +87,7 @@
                     android:visibility="gone">
 
                     <TextView
-                        android:id="@+id/textScanButtonContainer"
+                        android:id="@+id/textContainer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Scan container's QR code"
@@ -120,6 +120,47 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/sampleContainerLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/textSampleContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select sample container model"
+                        android:textSize="40sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:layout_marginBottom="8dp"
+                        tools:ignore="HardcodedText" />
+
+                    <TextView
+                        android:id="@+id/textNewSampleContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No suitable container model? Click here to add yours."
+                        android:textSize="15sp"
+                        android:gravity="center"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"
+                        tools:ignore="HardcodedText" />
+
+                    <!-- Spinner for container model -->
+                    <Spinner
+                        android:id="@+id/containerModelSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="40dp"
+                        android:spinnerMode="dropdown"
+                        tools:ignore="TouchTargetSizeCheck" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/aliquotLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -128,7 +169,38 @@
                     android:visibility="gone">
 
                     <TextView
-                        android:id="@+id/textScanButtonAliquot"
+                        android:id="@+id/textBatch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Choose a batch (Optional)"
+                        android:textSize="40sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:layout_marginBottom="8dp"
+                        tools:ignore="HardcodedText" />
+
+                    <Spinner
+                        android:id="@+id/batchSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:spinnerMode="dropdown"
+                        tools:ignore="TouchTargetSizeCheck" />
+
+                    <TextView
+                        android:id="@+id/batchDescriptionText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="25sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:layout_marginBottom="40dp"
+                        tools:ignore="HardcodedText" />
+
+                    <TextView
+                        android:id="@+id/textAliquot"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Scan extract's QR code"

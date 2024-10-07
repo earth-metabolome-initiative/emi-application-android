@@ -11,7 +11,6 @@ import android.text.SpannableString
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
@@ -191,7 +190,7 @@ class LabExtractionActivity : BaseActivity() {
                     isVolumeFilled = true
                     visibilityManager()
                 } else {
-                    isVolumeFilled = true
+                    isVolumeFilled = false
                     visibilityManager()
                 }
             }
@@ -259,7 +258,6 @@ class LabExtractionActivity : BaseActivity() {
                 startActivity(browserIntent)
             }
         }
-        Log.d("Spannable", "spannable: $spannableStringModel, length: ${spannableStringModel.length}")
         spannableStringModel.setSpan(clickableSpanModel, 0, spannableStringModel.length, spannableStringModel.length)
         linkTextViewModel.text = spannableStringModel
         linkTextViewModel.movementMethod = LinkMovementMethod.getInstance()
@@ -545,9 +543,17 @@ class LabExtractionActivity : BaseActivity() {
                                         sampleContainerModelId = ids[selectedValue].toString().toInt()
                                         isContainerModelFilled = true
                                         visibilityManager()
+                                        extractionMethodLayout.visibility = View.GONE
+                                        volumeLayout.visibility = View.GONE
+                                        textSummary.visibility = View.VISIBLE
+                                        textSummary.text = "Extraction method: $method\n\nSolvent volume: ${solventVolume.text} $unit"
                                     } else {
                                         isContainerModelFilled = false
                                         visibilityManager()
+                                        extractionMethodLayout.visibility = View.VISIBLE
+                                        volumeLayout.visibility = View.VISIBLE
+                                        textSummary.visibility = View.GONE
+                                        textSummary.text = ""
                                     }
                                 }
 
@@ -782,8 +788,6 @@ class LabExtractionActivity : BaseActivity() {
                 withContext(Dispatchers.Main) {
 
                     val responseCodeExt = responseExt.code
-                    Log.d("LabExtractionActivity", "code: ${response.code}")
-                    Log.d("LabExtractionActivity", "message: ${response.message}")
                     if (responseCodeExt == HttpURLConnection.HTTP_OK) {
                         // Display a Toast with the response message
                         showToast("$extract correctly added to database")
@@ -897,14 +901,8 @@ class LabExtractionActivity : BaseActivity() {
         }
         if (isContainerModelFilled) {
             extractLayout.visibility = View.VISIBLE
-            textSummary.visibility = View.VISIBLE
-            extractionMethodLayout.visibility = View.GONE
-            volumeLayout.visibility = View.GONE
-            textSummary.text = "Extraction method: $method\n\nSolvent volume: ${solventVolume.text} $unit"
         } else {
             extractLayout.visibility = View.GONE
-            textSummary.visibility = View.GONE
-            textSummary.text = ""
         }
     }
 

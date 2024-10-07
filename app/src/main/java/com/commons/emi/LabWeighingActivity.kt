@@ -169,7 +169,7 @@ class LabWeighingActivity : BaseActivity() {
             override fun afterTextChanged(s: Editable?) {
                 val inputText = s.toString()
                 isTargetWeightInputFilled = inputText.isNotEmpty() && inputText.toDoubleOrNull() != null
-                updateButtonVisibility()
+                updateExtractionSetupVisibility()
             }
         })
 
@@ -181,7 +181,7 @@ class LabWeighingActivity : BaseActivity() {
             override fun afterTextChanged(s: Editable?) {
                 val inputText = s.toString()
                 isTargetWeightToleranceFilled = inputText.isNotEmpty() && inputText.toDoubleOrNull() != null
-                updateButtonVisibility()
+                updateExtractionSetupVisibility()
             }
         })
 
@@ -213,7 +213,7 @@ class LabWeighingActivity : BaseActivity() {
             isObjectScanActive = true
             isQrScannerActive = true
             visibilityManager()
-            scanStatus.text = "Scan falcon"
+            scanStatus.text = "Scan sample"
             ScanManager.initialize(this, previewView, flashlightButton) { scannedSample ->
                 // Stop the scanning process after receiving the result
                 ScanManager.stopScanning()
@@ -355,7 +355,7 @@ class LabWeighingActivity : BaseActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateButtonVisibility() {
+    private fun updateExtractionSetupVisibility() {
         if (isTargetWeightInputFilled && isTargetWeightToleranceFilled) {
             isConstraintValid = true
             visibilityManager()

@@ -118,20 +118,30 @@
                         android:id="@+id/textBatch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Scan sample batch's QR code (Optionnal)"
+                        android:text="Choose a batch (Optional)"
                         android:textSize="40sp"
                         android:textStyle="bold"
                         android:gravity="center"
                         android:layout_marginBottom="8dp"
                         tools:ignore="HardcodedText" />
 
-                    <Button
-                        android:id="@+id/scanButtonBatch"
+                    <Spinner
+                        android:id="@+id/batchSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:spinnerMode="dropdown"
+                        tools:ignore="TouchTargetSizeCheck" />
+
+                    <TextView
+                        android:id="@+id/batchDescriptionText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Value"
-                        android:textSize="30sp"
+                        android:text=""
+                        android:textSize="25sp"
+                        android:textStyle="bold"
                         android:gravity="center"
+                        android:visibility="gone"
                         android:layout_marginBottom="40dp"
                         tools:ignore="HardcodedText" />
 

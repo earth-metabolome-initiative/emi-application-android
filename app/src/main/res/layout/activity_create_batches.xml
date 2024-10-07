@@ -1,0 +1,90 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:layout_marginBottom="16dp"
+    android:layout_marginTop="8dp"
+    android:padding="8dp">
+
+    <!-- Centering LinearLayout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        tools:ignore="UselessParent">
+
+        <!-- ScrollView to contain the main content -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            tools:ignore="UselessParent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/shortDescriptionLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add a short description for preview (max 200 characters)"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp"
+                    tools:ignore="HardcodedText" />
+
+                <EditText
+                    android:id="@+id/shortDescriptionText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="short description"
+                    android:textSize="30sp"
+                    android:layout_marginBottom="40dp"
+                    android:inputType="textMultiLine"
+                    android:minLines="2"
+                    android:gravity="center"
+                    tools:ignore="HardcodedText"
+                    android:autofillHints="" />
+
+                <TextView
+                    android:id="@+id/descriptionLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add a complete description"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp"
+                    tools:ignore="HardcodedText" />
+
+                <EditText
+                    android:id="@+id/descriptionText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="long description"
+                    android:textSize="30sp"
+                    android:layout_marginBottom="40dp"
+                    android:inputType="textMultiLine"
+                    android:minLines="2"
+                    android:gravity="center"
+                    tools:ignore="HardcodedText"
+                    android:autofillHints="" />
+
+                <Button
+                    android:id="@+id/submitButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="40sp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Submit"
+                    android:visibility="gone"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</FrameLayout>

@@ -6,25 +6,13 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    android:weightSum="1">
-
-    <TextView
-        android:id="@+id/batchText"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.25"
-        android:text=""
-        android:textSize="25sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="8dp"
-        tools:ignore="HardcodedText" />
+    android:weightSum="3">
 
     <Button
         android:id="@+id/driedBatchButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.25"
+        android:layout_weight="1"
         android:text="Create samples batch"
         android:textSize="40sp"
         android:layout_marginBottom="8dp"
@@ -34,7 +22,7 @@
         android:id="@+id/extractionBatchButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.25"
+        android:layout_weight="1"
         android:text="Create extraction batch"
         android:textSize="40sp"
         android:layout_marginBottom="8dp"
@@ -44,7 +32,7 @@
         android:id="@+id/aliquotBatchButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.25"
+        android:layout_weight="1"
         android:text="Create aliquots batch"
         android:textSize="40sp"
         android:layout_marginBottom="16dp"

@@ -46,7 +46,8 @@ class LabPrepActivity : BaseActivity() {
 
     private lateinit var sampleLayout: View
     private lateinit var textBatch: TextView
-    private lateinit var scanButtonBatch: Button
+    private lateinit var batchSpinner: Spinner
+    private lateinit var batchDescriptionText: TextView
     private lateinit var textSample: TextView
     private lateinit var scanButtonSample: Button
 
@@ -64,14 +65,14 @@ class LabPrepActivity : BaseActivity() {
     private var containerModelId: Int = 0
     private var containerId: Int = 0
     private var batchId: Int = 0
+    private var batchDescription: String = ""
 
     // Define trackers
     private var isQrScannerActive = false
     private var isContainerScanActive = false
     private var isContainerValid = false
     private var isContainerModelFilled = false
-    private var isBatchScanActive = false
-    private var isBatchValid = false
+    private var isBatchSelected = false
     private var isObjectScanActive = false
 
     override fun getLayoutResourceId(): Int {
@@ -97,7 +98,8 @@ class LabPrepActivity : BaseActivity() {
 
         sampleLayout = findViewById(R.id.sampleLayout)
         textBatch = findViewById(R.id.textBatch)
-        scanButtonBatch = findViewById(R.id.scanButtonBatch)
+        batchSpinner = findViewById(R.id.batchSpinner)
+        batchDescriptionText = findViewById(R.id.batchDescriptionText)
         textSample = findViewById(R.id.textSample)
         scanButtonSample = findViewById(R.id.scanButtonSample)
 
@@ -111,7 +113,6 @@ class LabPrepActivity : BaseActivity() {
         // Set up button click listener for Container QR Scanner
         scanButtonContainer.setOnClickListener {
             isContainerScanActive = true
-            isBatchScanActive = false
             isObjectScanActive = false
             isQrScannerActive = true
             visibilityManager()
@@ -140,7 +141,6 @@ class LabPrepActivity : BaseActivity() {
                 startActivity(browserIntent)
             }
         }
-        Log.d("Spannable", "spannable: $spannableString, length: ${spannableString.length}")
         spannableString.setSpan(clickableSpan, 0, spannableString.length, spannableString.length)
         linkTextView.text = spannableString
         linkTextView.movementMethod = LinkMovementMethod.getInstance()
@@ -148,30 +148,11 @@ class LabPrepActivity : BaseActivity() {
         // Fetch container models and populate the container models spinner.
         fetchValuesAndPopulateContainerModelsSpinner()
 
-        // Set up button click listener for batch QR Scanner
-        scanButtonBatch.setOnClickListener {
-            isContainerScanActive = false
-            isBatchScanActive = true
-            isObjectScanActive = false
-            isQrScannerActive = true
-            visibilityManager()
-            scanStatus.text = "Scan a batch"
-            ScanManager.initialize(this, previewView, flashlightButton) {scannedBatch ->
-
-                // Stop the scanning process after receiving the result
-                ScanManager.stopScanning()
-                isQrScannerActive = false
-                visibilityManager()
-                scanButtonBatch.textSize = 25f
-                scanButtonBatch.text = scannedBatch
-                manageScan()
-            }
-        }
+        fetchValuesAndPopulateBatchSpinner()
 
         // Set up button click listener for sample's QR Scanner
         scanButtonSample.setOnClickListener {
             isContainerScanActive = false
-            isBatchScanActive = false
             isObjectScanActive = true
             isQrScannerActive = true
             visibilityManager()
@@ -288,6 +269,102 @@ class LabPrepActivity : BaseActivity() {
         }
     }
 
+    // Function to obtain extraction methods from directus and to populate the spinner.
+    private fun fetchValuesAndPopulateBatchSpinner() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val collectionUrl =
+                    "${DatabaseManager.getInstance()}/items/Batches"
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .addHeader("Accept", "application/json")
+                    .url(collectionUrl)
+                    .build()
+
+                val response = client.newCall(request).execute()
+                if (response.code == HttpURLConnection.HTTP_OK) {
+                    val responseBody = response.body?.string()
+
+                    val jsonObject = responseBody?.let { JSONObject(it) }
+                    val dataArray = jsonObject?.getJSONArray("data")
+
+                    val values = ArrayList<String>()
+                    val ids = HashMap<String, Int>()
+                    val descriptions = HashMap<String, String>()
+
+                    // Add "Choose an option" to the list of values
+                    values.add("No batch")
+
+                    if (dataArray != null) {
+                        for (i in 0 until dataArray.length()) {
+                            val item = dataArray.getJSONObject(i)
+                            val batchId = item.optString("batch_id")
+                            val shortDescription = item.optString("short_description")
+                            val value = "$batchId,\n$shortDescription"
+                            val id = item.optInt("id")
+                            val description = item.optString("description")
+                            val batchType = item.optInt("batch_type")
+                            if (batchType == 7) {
+                                values.add(value)
+                                ids[value] = id
+                                descriptions[value] = description
+                            }
+                        }
+                    }
+
+                    runOnUiThread {
+                        // Populate spinner with values
+                        choices = values // Update choices list
+                        val adapter = ArrayAdapter(
+                            this@LabPrepActivity,
+                            R.layout.spinner_list,
+                            values
+                        )
+                        adapter.setDropDownViewResource(R.layout.spinner_list)
+                        batchSpinner.adapter = adapter
+
+                        // Add an OnItemSelectedListener to update newExtractionMethod text and handle visibility
+                        batchSpinner.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                @SuppressLint("SetTextI18n")
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+                                    if (position > 0) { // Check if a valid option (not "Choose an option") is selected
+                                        val selectedValue = values[position]
+                                        batchId = ids[selectedValue].toString().toInt()
+                                        batchDescription = descriptions[selectedValue].toString()
+                                        batchDescriptionText.visibility = View.VISIBLE
+                                        batchDescriptionText.text = batchDescription
+                                        isBatchSelected = true
+
+                                    } else {
+                                        batchDescriptionText.visibility = View.GONE
+                                        isBatchSelected = false
+                                    }
+                                }
+
+                                @SuppressLint("SetTextI18n")
+                                override fun onNothingSelected(parent: AdapterView<*>?) {
+                                    batchDescriptionText.visibility = View.GONE
+                                    isBatchSelected = false
+                                }
+                            }
+                    }
+                } else {
+                    showToast("Connection error")
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                showToast("$e")
+            }
+        }
+    }
+
     private fun manageScan() {
         if (isContainerScanActive) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -296,14 +373,6 @@ class LabPrepActivity : BaseActivity() {
                 containerModelId = DatabaseManager.getContainerModelId(containerId)
                 withContext(Dispatchers.Main) {
                     handleContainerScan(places)
-                }
-            }
-        } else if (isBatchScanActive) {
-            CoroutineScope(Dispatchers.IO).launch {
-                val batch = scanButtonBatch.text.toString()
-                batchId = DatabaseManager.getBatchIdIfValid(batch, "dried_samples")
-                withContext(Dispatchers.Main) {
-                    handleBatchScan(batchId, batch)
                 }
             }
         } else if (isObjectScanActive) {
@@ -318,63 +387,15 @@ class LabPrepActivity : BaseActivity() {
         }
     }
 
-    // Function to send data to Directus
-    @SuppressLint("SetTextI18n")
-    private suspend fun sendDataToDirectus(
-        sampleKey: Int,
-        containerKey: Int,
-        sampleId: String
-    ) {
-        // Perform the POST request to add the values on directus
-        try {
-            // Retrieve primary keys, token and URL
-            val collectionUrl = DatabaseManager.getInstance() + "/items/Dried_Samples_Data"
-            val accessToken = DatabaseManager.getAccessToken()
-
-            val client = OkHttpClient()
-
-            val jsonBody = JSONObject().apply {
-                put("sample_container", sampleKey)
-                put("parent_container", containerKey)
-                put("status", "present")
-                if (isBatchValid) {
-                    put("batch", batchId)
-                }
-            }
-
-            val requestBody = jsonBody.toString()
-                .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-
-            val request = Request.Builder()
-                .url(collectionUrl)
-                .addHeader("Authorization", "Bearer $accessToken")
-                .post(requestBody)
-                .build()
-
-            val response = client.newCall(request).execute()
-
-            withContext(Dispatchers.Main) {
-
-                val responseCode = response.code
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    // Display a Toast with the response message
-                    showToast("$sampleId correctly added to database")
-
-                    // Check if there is still enough place in the container before initiating the QR code reader
-                    val places = DatabaseManager.checkContainerLoad(containerId)
-                    handleContainerScan(places)
-                    if (places > 0) {
-                        scanButtonSample.performClick()
-                    }
-                } else {
-                        emptyPlace.visibility = View.VISIBLE
-                        emptyPlace.text =
-                            "$sampleId already added to database.\nIf you want to move it, please use the moving mode."
-                    }
-            }
-        } catch (e: IOException) {
-            showToast("Error: $e")
-            }
+    private fun handleContainerScan(places: Int) {
+        when (places) {
+            in 1..Int.MAX_VALUE -> updateUIForValidContainer(places)
+            0 -> updateUIForFullContainer()
+            -1 -> updateUIForSampleTubeError()
+            -3 -> updateUIForIndeterminateContainer()
+            -4 -> updateUIForInvalidContainer()
+            else -> updateUIForUnknownError()
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -426,46 +447,6 @@ class LabPrepActivity : BaseActivity() {
         emptyPlace.setTextColor(Color.RED)
     }
 
-    private fun handleContainerScan(places: Int) {
-        when (places) {
-            in 1..Int.MAX_VALUE -> updateUIForValidContainer(places)
-            0 -> updateUIForFullContainer()
-            -1 -> updateUIForSampleTubeError()
-            -3 -> updateUIForIndeterminateContainer()
-            -4 -> updateUIForInvalidContainer()
-            else -> updateUIForUnknownError()
-        }
-    }
-
-    private fun handleBatchScan(batchId: Int, batch: String) {
-        when (batchId) {
-            in 1..Int.MAX_VALUE -> updateUIForValidBatch()
-            -1 -> updateUIForInvalidBatch(batch)
-            -2 -> updateUIForNonExitingBatch(batch)
-            else -> updateUIForUnknownError()
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    fun updateUIForValidBatch() {
-        isBatchValid = true
-        scanButtonBatch.setTextColor(Color.WHITE)
-    }
-
-    @SuppressLint("SetTextI18n")
-    fun updateUIForInvalidBatch(batch: String) {
-        isBatchValid = false
-        showToast("$batch is not a valid sample batch.")
-        scanButtonBatch.setTextColor(Color.RED)
-    }
-
-    @SuppressLint("SetTextI18n")
-    fun updateUIForNonExitingBatch(batch: String) {
-        isBatchValid = false
-        showToast("$batch doesn't exit in the database.")
-        scanButtonBatch.setTextColor(Color.RED)
-    }
-
     @SuppressLint("SetTextI18n")
     fun handleObjectScan(sample: String) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -482,6 +463,88 @@ class LabPrepActivity : BaseActivity() {
                 }
             }
         }
+    }
+
+    // Function to send data to Directus
+    @SuppressLint("SetTextI18n")
+    private suspend fun sendDataToDirectus(
+        sample: Int,
+        containerId: Int,
+        sampleId: String
+    ) {
+        // Perform the PATCH request to add the values on directus
+        try {
+            // Retrieve primary keys, token and URL
+            val collectionUrl = "${DatabaseManager.getInstance()}/items/Containers/$sampleId"
+            val accessToken = DatabaseManager.getAccessToken()
+
+            val client = OkHttpClient()
+
+            val jsonBody = JSONObject().apply {
+                put("container_model", sampleContainerModelId)
+            }
+
+            val requestBody = jsonBody.toString()
+                .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+
+            val request = Request.Builder()
+                .url(collectionUrl)
+                .addHeader("Authorization", "Bearer $accessToken")
+                .patch(requestBody)
+                .build()
+
+            val response = client.newCall(request).execute()
+
+            val responseCode = response.code
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // Retrieve primary keys, token and URL
+                val collectionUrlData = DatabaseManager.getInstance() + "/items/Dried_Samples_Data"
+
+                val clientData = OkHttpClient()
+
+                val jsonBodyData = JSONObject().apply {
+                    put("sample_container", sampleId)
+                    put("parent_container", containerId)
+                    put("status", "present")
+                    if (isBatchSelected) {
+                        put("batch", batchId)
+                    }
+                }
+
+                val requestBodyData = jsonBodyData.toString()
+                    .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+
+                val requestData = Request.Builder()
+                    .url(collectionUrlData)
+                    .addHeader("Authorization", "Bearer $accessToken")
+                    .post(requestBodyData)
+                    .build()
+
+                val responseData = clientData.newCall(requestData).execute()
+
+                withContext(Dispatchers.Main) {
+
+                    val responseCodeData = responseData.code
+                    if (responseCodeData == HttpURLConnection.HTTP_OK) {
+                        // Display a Toast with the response message
+                        showToast("$sample correctly added to database")
+
+                        // Check if there is still enough place in the container before initiating the QR code reader
+                        val places = DatabaseManager.checkContainerLoad(containerId)
+                        handleContainerScan(places)
+                        if (places > 0) {
+                            scanButtonSample.performClick()
+                        }
+                    } else {
+                        emptyPlace.visibility = View.VISIBLE
+                        emptyPlace.text =
+                            "$sample already added to database.\nIf you want to move it, please use the moving mode."
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            showToast("Error: $e")
+            }
     }
 
     private fun visibilityManager () {

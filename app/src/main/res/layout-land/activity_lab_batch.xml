@@ -3,70 +3,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:gravity="center"
     android:padding="16dp"
-    android:weightSum="1">
+    android:weightSum="3">
 
-    <!-- LinearLayout for Date and Time side by side -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.5"
-        android:orientation="horizontal"
-        android:layout_marginTop="10dp">
+    <Button
+        android:id="@+id/driedBatchButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="Create samples batch"
+        android:textSize="30sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        tools:ignore="ButtonStyle,HardcodedText" />
 
-        <TextView
-            android:id="@+id/batchText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:text=""
-            android:gravity="center"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            tools:ignore="ButtonStyle,HardcodedText,NestedWeights" />
+    <Button
+        android:id="@+id/extractionBatchButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="Create extracts batch"
+        android:textSize="30sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        tools:ignore="ButtonStyle,HardcodedText,NestedWeights" />
 
-        <Button
-            android:id="@+id/driedBatchButton"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:text="Create samples batch"
-            android:textSize="30sp"
-            android:layout_marginBottom="8dp"
-            tools:ignore="ButtonStyle,HardcodedText" />
-    </LinearLayout>
-
-    <!-- LinearLayout for Buttons side by side -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.5"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/extractionBatchButton"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:text="Create extracts batch"
-            android:textSize="30sp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            tools:ignore="ButtonStyle,HardcodedText,NestedWeights" />
-
-        <Button
-            android:id="@+id/aliquotBatchButton"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:text="Create aliquots batch"
-            android:textSize="30sp"
-            android:layout_marginBottom="16dp"
-            tools:ignore="ButtonStyle,HardcodedText" />
-    </LinearLayout>
+    <Button
+        android:id="@+id/aliquotBatchButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="Create aliquots batch"
+        android:textSize="30sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        tools:ignore="ButtonStyle,HardcodedText" />
 
 </LinearLayout>
