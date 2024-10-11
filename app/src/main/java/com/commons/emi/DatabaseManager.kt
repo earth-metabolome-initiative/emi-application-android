@@ -1,5 +1,6 @@
 package com.commons.emi
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -210,6 +211,56 @@ object DatabaseManager {
             result
         } catch (e: IOException) {
             -6 // internet or other errors
+        }
+    }
+
+    suspend fun getContainerIdIfNew(container: String): Int = withContext(Dispatchers.IO) {
+        try {
+            val result: Int
+
+            val collectionUrl = if (container.matches(Regex("^container_\\dx\\d_\\d{6}\$")) || container == "absent") {
+                "${getInstance()}/items/Containers?filter[old_id][_eq]=$container&&limit=1"
+            } else {
+                "${getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
+            }
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    result = if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val id = firstItem.optInt("id")
+                        val containerModel = firstItem.optString("container_model")
+                        Log.d("rack", containerModel)
+                        if (containerModel == "null") {
+                            id
+                        } else {
+                            -1
+                        }
+                    } else {
+                        -2 // no data found
+                    }
+                } else {
+                    result = -3 //response body null
+                }
+            } else {
+                result = -4// non 200 response
+            }
+            result
+        } catch (e: IOException) {
+            -5 // internet or other errors
         }
     }
 
@@ -580,7 +631,7 @@ object DatabaseManager {
         try {
             val result: String
 
-            val collectionUrl = "${getInstance()}/items/SI_Units?filter[id][_eq]=$brandId&&limit=1"
+            val collectionUrl = "${getInstance()}/items/Brands?filter[id][_eq]=$brandId&&limit=1"
 
             val client = OkHttpClient()
             val request = Request.Builder()
@@ -646,6 +697,7 @@ object DatabaseManager {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     suspend fun getNewBatch(): String = withContext(Dispatchers.IO) {
         try {
             val result: String

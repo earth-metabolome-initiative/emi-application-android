@@ -375,9 +375,9 @@ class CustomExpandableListAdapter(
         } else if (groupPosition == 1 && childPosition == 1) {
             textView.text = if (isDBConnected) "${DatabaseManager.username} logged in" else "Status: Disconnected"
         } else {
-        textView.text = childText
-        textView.setTextColor(context.getColor(R.color.black)) // Default color for other items
-        textView.isEnabled = true // Make sure other items are enabled
+            textView.text = childText
+            textView.setTextColor(context.getColor(R.color.black)) // Default color for other items
+            textView.isEnabled = true // Make sure other items are enabled
         }
 
         return convertView
@@ -416,4 +416,3 @@ class CustomExpandableListAdapter(
         return true
     }
 }
-

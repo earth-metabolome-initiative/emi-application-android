@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <item
+        android:title="Database"
+        tools:ignore="HardcodedText">
+        <menu>
+            <item
+                android:title="Change user"
+                android:id="@+id/nav_menu_db"/>
+            <item
+                android:title="Status: Disconnected"
+                android:id="@+id/nav_menu_db_info"/>
+        </menu>
+    </item>
+
+    <item
+        android:title="Printer"
+        tools:ignore="HardcodedText">
+        <menu>
+            <item
+                android:title="Connect a printer"
+                android:id="@+id/nav_menu_printer"/>
+            <item
+                android:title="Status: Disconnected"
+                android:id="@+id/nav_menu_printer_info"/>
+        </menu>
+
+    </item>
+
+    <item
+        android:title="Informations"
+        tools:ignore="HardcodedText">
+        <menu>
+            <item
+                android:title="About us"
+                android:id="@+id/nav_menu_about"/>
+            <item
+                android:title="Help"
+                android:id="@+id/nav_menu_help"/>
+            <item
+                android:title="Report a bug"
+                android:id="@+id/nav_menu_bug"/>
+        </menu>
+    </item>
+</menu>

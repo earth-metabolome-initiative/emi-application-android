@@ -115,7 +115,7 @@ class LabExtractionActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //checkPrinterConnection()
+        checkPrinterConnection()
 
         title = "Extraction screen"
 
@@ -501,16 +501,17 @@ class LabExtractionActivity : BaseActivity() {
                     if (dataArray != null) {
                         for (i in 0 until dataArray.length()) {
                             val item = dataArray.getJSONObject(i)
-                            val containerTypeId = item.optInt("container_type")
-                            val containerType = DatabaseManager.getContainerType(containerTypeId)
+                            val isSampleContainer = item.optBoolean("is_sample_container")
                             val volume = item.optDouble("volume")
-                            val volumeUnitId = item.optInt("volume_unit")
-                            val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
-                            val brandId = item.optInt("brand")
-                            val brand = DatabaseManager.getBrand(brandId)
-                            val value = "$containerType $volume $volumeUnit $brand"
-                            val id = item.optInt("id")
-                            if (volume > 0 && volumeUnit != "pcs") {
+                            if (volume > 0 && isSampleContainer) {
+                                val containerTypeId = item.optInt("container_type")
+                                val containerType = DatabaseManager.getContainerType(containerTypeId)
+                                val volumeUnitId = item.optInt("volume_unit")
+                                val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
+                                val brandId = item.optInt("brand")
+                                val brand = DatabaseManager.getBrand(brandId)
+                                val value = "$containerType $volume $volumeUnit $brand"
+                                val id = item.optInt("id")
                                 values.add(value)
                                 ids[value] = id
                             }
@@ -597,7 +598,6 @@ class LabExtractionActivity : BaseActivity() {
             CoroutineScope(Dispatchers.IO).launch {
                 val sample = scanButtonExtract.text.toString()
                 sampleContainerId = DatabaseManager.getContainerIdIfValid(sample, true)
-                sampleContainerModelId = DatabaseManager.getContainerModelId(sampleContainerId)
                 withContext(Dispatchers.Main) {
                     handleObjectScan(sample)
                 }

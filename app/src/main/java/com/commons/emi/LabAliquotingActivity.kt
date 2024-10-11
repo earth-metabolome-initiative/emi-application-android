@@ -97,6 +97,8 @@ class LabAliquotingActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        checkPrinterConnection()
+
         title = "Aliquoting screen"
 
         // Initialize views
@@ -331,16 +333,17 @@ class LabAliquotingActivity : BaseActivity() {
                     if (dataArray != null) {
                         for (i in 0 until dataArray.length()) {
                             val item = dataArray.getJSONObject(i)
-                            val containerTypeId = item.optInt("container_type")
-                            val containerType = DatabaseManager.getContainerType(containerTypeId)
+                            val isSampleContainer = item.optBoolean("is_sample_container")
                             val volume = item.optDouble("volume")
-                            val volumeUnitId = item.optInt("volume_unit")
-                            val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
-                            val brandId = item.optInt("brand")
-                            val brand = DatabaseManager.getBrand(brandId)
-                            val value = "$containerType $volume $volumeUnit $brand"
-                            val id = item.optInt("id")
-                            if (volume > 0 && volumeUnit != "pcs") {
+                            if (volume > 0 && isSampleContainer) {
+                                val containerTypeId = item.optInt("container_type")
+                                val containerType = DatabaseManager.getContainerType(containerTypeId)
+                                val volumeUnitId = item.optInt("volume_unit")
+                                val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
+                                val brandId = item.optInt("brand")
+                                val brand = DatabaseManager.getBrand(brandId)
+                                val value = "$containerType $volume $volumeUnit $brand"
+                                val id = item.optInt("id")
                                 values.add(value)
                                 ids[value] = id
                             }
@@ -507,7 +510,6 @@ class LabAliquotingActivity : BaseActivity() {
             CoroutineScope(Dispatchers.IO).launch {
                 val sample = scanButtonAliquot.text.toString()
                 sampleContainerId = DatabaseManager.getContainerIdIfValid(sample, true)
-                sampleContainerModelId = DatabaseManager.getContainerModelId(sampleContainerId)
                 withContext(Dispatchers.Main) {
                     handleObjectScan(sample)
                 }
@@ -585,7 +587,6 @@ class LabAliquotingActivity : BaseActivity() {
                     sendDataToDirectus(
                         extractId = sampleContainerId,
                         volume = volume,
-                        volumeUnit = unitId,
                         containerId = containerId,
                         extract = sample
                     )
@@ -601,7 +602,7 @@ class LabAliquotingActivity : BaseActivity() {
     }
 
     // Function to send data to Directus
-    private suspend fun sendDataToDirectus(extractId: Int, volume: Double, volumeUnit: Int, containerId: Int, extract: String) {
+    private suspend fun sendDataToDirectus(extractId: Int, volume: Double, containerId: Int, extract: String) {
         // Define the table url
         val aliquot = checkExistenceInDirectus(extract)
         if (aliquot != null) {
@@ -615,7 +616,7 @@ class LabAliquotingActivity : BaseActivity() {
 
                 val jsonBody = JSONObject().apply {
                     put("container_id", aliquot)
-                    put("container_model", sampleContainerId)
+                    put("container_model", sampleContainerModelId)
                     put("status", "present")
                     put("reserved", true)
                     put("used", true)
@@ -658,7 +659,7 @@ class LabAliquotingActivity : BaseActivity() {
                             put("parent_sample_container", extractId)
                             put("parent_container", containerId)
                             put("aliquot_volume", volume)
-                            put("aliquot_volume_Unit", volumeUnit)
+                            put("aliquot_volume_Unit", unitId)
                             put("status", "present")
                         }
 
@@ -692,7 +693,7 @@ class LabAliquotingActivity : BaseActivity() {
                     }
 
                 } else {
-                    showToast("Error, $extract seems to be absent from the database.")
+                    showToast("Error, $extract seems to be absent from the database: $responseCode")
                 }
             } catch (e: IOException) {
                 showToast("Error: $e")

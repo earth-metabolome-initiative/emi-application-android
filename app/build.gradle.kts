@@ -4,22 +4,13 @@ plugins {
 }
 
 android {
-    signingConfigs {
-        create("release") {
-            keyAlias = "emikey"
-            keyPassword = "emi_emi"
-            storePassword = "emi_emi"
-            storeFile =
-                file("/home/edouard/Bureau/dbgi/EMI_APPLICATION_KEY/emikey.kts")
-        }
-    }
     namespace = "com.commons.emi"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.commons.emi"
-        minSdk = 30
-        targetSdk = 34
+        minSdk = 29
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 

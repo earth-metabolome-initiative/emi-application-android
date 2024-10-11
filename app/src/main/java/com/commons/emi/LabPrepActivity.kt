@@ -203,16 +203,18 @@ class LabPrepActivity : BaseActivity() {
                     if (dataArray != null) {
                         for (i in 0 until dataArray.length()) {
                             val item = dataArray.getJSONObject(i)
-                            val containerTypeId = item.optInt("container_type")
-                            val containerType = DatabaseManager.getContainerType(containerTypeId)
+                            val isSampleContainer = item.optBoolean("is_sample_container")
                             val volume = item.optDouble("volume")
-                            val volumeUnitId = item.optInt("volume_unit")
-                            val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
-                            val brandId = item.optInt("brand")
-                            val brand = DatabaseManager.getBrand(brandId)
-                            val value = "$containerType $volume $volumeUnit $brand"
-                            val id = item.optInt("id")
-                            if (volume > 0 && volumeUnit != "pcs") {
+                            if (volume > 0 && isSampleContainer) {
+                                val containerTypeId = item.optInt("container_type")
+                                val containerType = DatabaseManager.getContainerType(containerTypeId)
+                                val volumeUnitId = item.optInt("volume_unit")
+                                val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
+                                val brandId = item.optInt("brand")
+                                val brand = DatabaseManager.getBrand(brandId)
+                                showToast("brand: $brand")
+                                val value = "$containerType $volume $volumeUnit $brand"
+                                val id = item.optInt("id")
                                 values.add(value)
                                 ids[value] = id
                             }
@@ -379,7 +381,6 @@ class LabPrepActivity : BaseActivity() {
             CoroutineScope(Dispatchers.IO).launch {
                 val sample = scanButtonSample.text.toString()
                 sampleContainerId = DatabaseManager.getContainerIdIfValid(sample, true)
-                sampleContainerModelId = DatabaseManager.getContainerModelId(sampleContainerId)
                 withContext(Dispatchers.Main) {
                     handleObjectScan(sample)
                 }
@@ -451,6 +452,7 @@ class LabPrepActivity : BaseActivity() {
     fun handleObjectScan(sample: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val isPairLegal = DatabaseManager.checkContainerHierarchy(containerModelId, sampleContainerModelId)
+            Log.d("is pair legal", "status: $isPairLegal")
             if (isPairLegal) {
                 withContext(Dispatchers.IO) {
                     sendDataToDirectus(sampleContainerId, containerId, sample)
@@ -475,7 +477,7 @@ class LabPrepActivity : BaseActivity() {
         // Perform the PATCH request to add the values on directus
         try {
             // Retrieve primary keys, token and URL
-            val collectionUrl = "${DatabaseManager.getInstance()}/items/Containers/$sampleId"
+            val collectionUrl = "${DatabaseManager.getInstance()}/items/Containers/$sample"
             val accessToken = DatabaseManager.getAccessToken()
 
             val client = OkHttpClient()
@@ -497,13 +499,14 @@ class LabPrepActivity : BaseActivity() {
 
             val responseCode = response.code
             if (responseCode == HttpURLConnection.HTTP_OK) {
+                Log.d("container modified", "success to modify container model")
                 // Retrieve primary keys, token and URL
                 val collectionUrlData = DatabaseManager.getInstance() + "/items/Dried_Samples_Data"
 
                 val clientData = OkHttpClient()
 
                 val jsonBodyData = JSONObject().apply {
-                    put("sample_container", sampleId)
+                    put("sample_container", sample)
                     put("parent_container", containerId)
                     put("status", "present")
                     if (isBatchSelected) {
@@ -527,7 +530,7 @@ class LabPrepActivity : BaseActivity() {
                     val responseCodeData = responseData.code
                     if (responseCodeData == HttpURLConnection.HTTP_OK) {
                         // Display a Toast with the response message
-                        showToast("$sample correctly added to database")
+                        showToast("$sampleId correctly added to database")
 
                         // Check if there is still enough place in the container before initiating the QR code reader
                         val places = DatabaseManager.checkContainerLoad(containerId)
@@ -538,7 +541,7 @@ class LabPrepActivity : BaseActivity() {
                     } else {
                         emptyPlace.visibility = View.VISIBLE
                         emptyPlace.text =
-                            "$sample already added to database.\nIf you want to move it, please use the moving mode."
+                            "$sampleId already added to database.\nIf you want to move it, please use the moving mode."
                     }
                 }
             }
