@@ -225,6 +225,12 @@ class LabWeighingActivity : BaseActivity() {
             }
         }
 
+        closeButton.setOnClickListener {
+            ScanManager.stopScanning()
+            isQrScannerActive = false
+            visibilityManager()
+        }
+
         // Add a TextWatcher to the numberInput for real-time validation. Permits to constrain the user entry to a 5% error from the target weight.
         weightInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

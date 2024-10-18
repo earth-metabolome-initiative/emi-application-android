@@ -119,7 +119,6 @@ class LabPrepActivity : BaseActivity() {
             noneButton.visibility = View.VISIBLE
             scanStatus.text = "Scan a container"
             ScanManager.initialize(this, previewView, flashlightButton, noneButton) {scannedContainer ->
-
                 // Stop the scanning process after receiving the result
                 ScanManager.stopScanning()
                 isQrScannerActive = false
@@ -452,7 +451,6 @@ class LabPrepActivity : BaseActivity() {
     fun handleObjectScan(sample: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val isPairLegal = DatabaseManager.checkContainerHierarchy(containerModelId, sampleContainerModelId)
-            Log.d("is pair legal", "status: $isPairLegal")
             if (isPairLegal) {
                 withContext(Dispatchers.IO) {
                     sendDataToDirectus(sampleContainerId, containerId, sample)
