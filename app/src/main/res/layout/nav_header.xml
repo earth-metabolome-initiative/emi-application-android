@@ -3,14 +3,21 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="225dp"
     android:gravity="bottom"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/gold_2">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@mipmap/ic_launcher_round"
+        android:layout_gravity="center"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Créateur: Edouard Brülhart"
+        android:text="Earth Metabolome Initiative"
         android:textColor="@color/white"
         android:gravity="center"
         android:layout_gravity="center"
@@ -21,7 +28,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_gravity="center"
-        android:text="Contact: edouard.brulhart@gmail.com"
+        android:text="dbgi@protonmail.com"
         android:textColor="@color/white"
         android:textSize="14sp"
         android:layout_marginBottom="16dp"/>

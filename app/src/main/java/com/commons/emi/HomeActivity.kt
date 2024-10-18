@@ -8,7 +8,6 @@ import android.widget.Toast
 
 class HomeActivity : BaseActivity() {
 
-    private lateinit var connectPrinterButton: Button
     private lateinit var labButton: Button
     private lateinit var logisticButton: Button
     private lateinit var searchButton: Button

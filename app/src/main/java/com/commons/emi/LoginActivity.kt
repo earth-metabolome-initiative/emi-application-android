@@ -42,6 +42,14 @@ class LoginActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Login", null) // No navigation for the current page
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
+
         title = "Connection screen"
 
         val launchedFromDrawer = intent.getStringExtra("LAUNCHED")

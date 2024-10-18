@@ -211,7 +211,6 @@ class LabPrepActivity : BaseActivity() {
                                 val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
                                 val brandId = item.optInt("brand")
                                 val brand = DatabaseManager.getBrand(brandId)
-                                showToast("brand: $brand")
                                 val value = "$containerType $volume $volumeUnit $brand"
                                 val id = item.optInt("id")
                                 values.add(value)

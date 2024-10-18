@@ -137,9 +137,9 @@ object PrinterManager : AppCompatActivity(), PrinterUpdateListener, PrinterDisco
         _isConnected.postValue(isPrinterReachable())
     }
 
-    fun isPrinterReachable(): Boolean {
+    private fun isPrinterReachable(): Boolean {
         return if (::printerDetails.isInitialized) {
-            printerDetails.printerStatusMessage == "PrinterStatus_Initialized" || printerDetails.printerStatusMessage == "PrinterStatus_BatteryLow"
+            printerDetails.printerStatusMessage != "PrinterStatus_Disconnected"
         } else {
             false
         }

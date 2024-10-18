@@ -8,10 +8,16 @@
         <menu>
             <item
                 android:title="Change user"
+                android:icon="@drawable/ic_db"
                 android:id="@+id/nav_menu_db"/>
             <item
-                android:title="Status: Disconnected"
+                android:title="Disconnected"
+                android:icon="@drawable/ic_db_status_red"
                 android:id="@+id/nav_menu_db_info"/>
+            <item
+                android:title="user:"
+                android:visible="false"
+                android:id="@+id/nav_menu_db_user"/>
         </menu>
     </item>
 
@@ -21,26 +27,39 @@
         <menu>
             <item
                 android:title="Connect a printer"
+                android:icon="@drawable/ic_printer"
                 android:id="@+id/nav_menu_printer"/>
             <item
-                android:title="Status: Disconnected"
+                android:title="Disconnected"
+                android:icon="@drawable/ic_red_printer"
                 android:id="@+id/nav_menu_printer_info"/>
+            <item
+                android:title="Model"
+                android:visible="false"
+                android:id="@+id/nav_menu_printer_model"/>
+            <item
+                android:title="Remaining ribbon"
+                android:visible="false"
+                android:id="@+id/nav_menu_printer_ribbon"/>
         </menu>
 
     </item>
 
     <item
-        android:title="Informations"
+        android:title="About"
         tools:ignore="HardcodedText">
         <menu>
             <item
-                android:title="About us"
+                android:title="Website"
+                android:icon="@drawable/ic_info"
                 android:id="@+id/nav_menu_about"/>
             <item
                 android:title="Help"
+                android:icon="@drawable/ic_help"
                 android:id="@+id/nav_menu_help"/>
             <item
                 android:title="Report a bug"
+                android:icon="@drawable/ic_bug"
                 android:id="@+id/nav_menu_bug"/>
         </menu>
     </item>
