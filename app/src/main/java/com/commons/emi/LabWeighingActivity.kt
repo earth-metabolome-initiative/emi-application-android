@@ -106,7 +106,18 @@ class LabWeighingActivity : BaseActivity() {
 
         checkPrinterConnection()
 
-        title = "Weighing screen"
+        title = "Weighing"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Login", LoginActivity::class.java),
+            Pair("Home", HomeActivity::class.java),
+            Pair("Laboratory", HomeLabActivity::class.java),
+            Pair("Weighing", null)
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
 
         // Initialize objects views
         unitLayout = findViewById(R.id.unitLayout)
@@ -652,7 +663,7 @@ class LabWeighingActivity : BaseActivity() {
         val printerDetails = PrinterManager.printerDetails
 
         val selectedFileName = when (printerDetails.printerModel) {
-            //"M211" -> R.raw.template_m211_extract
+            "M211" -> R.raw.template_m211_extract
             "M511" -> R.raw.template_m511_extract
             else -> throw IllegalArgumentException("${printerDetails.printerModel} is not supported.")
         }

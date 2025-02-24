@@ -17,7 +17,17 @@ class HomeLogisticActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        title = "Logistic screen"
+        title = "Logistic"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Login", LoginActivity::class.java),
+            Pair("Home", HomeActivity::class.java),
+            Pair("Logistic", null)
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
 
         attributeButton = findViewById(R.id.attributeButton)
         moveButton = findViewById(R.id.moveButton)

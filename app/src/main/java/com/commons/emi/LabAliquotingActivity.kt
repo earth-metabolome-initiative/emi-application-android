@@ -10,6 +10,7 @@ import android.text.SpannableString
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -99,7 +100,18 @@ class LabAliquotingActivity : BaseActivity() {
 
         checkPrinterConnection()
 
-        title = "Aliquoting screen"
+        title = "Aliquoting"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Login", LoginActivity::class.java),
+            Pair("Home", HomeActivity::class.java),
+            Pair("Laboratory", HomeLabActivity::class.java),
+            Pair("Aliquoting", null)
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
 
         // Initialize views
         volumeLayout = findViewById(R.id.volumeLayout)
@@ -625,6 +637,7 @@ class LabAliquotingActivity : BaseActivity() {
                     put("columns_numeric", true)
                     put("rows", 1)
                     put("rows_numeric", true)
+                    put("parent_container", containerId)
                 }
 
                 val requestBody = jsonBody.toString()
@@ -659,9 +672,11 @@ class LabAliquotingActivity : BaseActivity() {
                             put("parent_sample_container", extractId)
                             put("parent_container", containerId)
                             put("aliquot_volume", volume)
-                            put("aliquot_volume_Unit", unitId)
+                            put("aliquot_volume_unit", unitId)
                             put("status", "present")
                         }
+
+                        Log.d("tests", "sample container: $aliquotId, parent sample container: $extractId, parent container: $containerId, volume: $volume, unit: $unitId")
 
                         val requestBodyExt = jsonBodyExt.toString()
                             .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
@@ -675,9 +690,10 @@ class LabAliquotingActivity : BaseActivity() {
                         val responseExt = clientExt.newCall(requestExt).execute()
 
                         val responseCodeExt = responseExt.code
+                        Log.d("response body", "${responseExt.body?.string()?.let { JSONObject(it) }}")
                         if (responseCodeExt == HttpURLConnection.HTTP_OK) {
                             // 'response' contains the response from the server
-                            showToast("$extractId correctly added to database")
+                            showToast("$aliquot correctly added to database")
                             printLabel(aliquot)
                             // Start a coroutine to delay the next scan by 5 seconds
                             CoroutineScope(Dispatchers.Main).launch {
@@ -685,6 +701,7 @@ class LabAliquotingActivity : BaseActivity() {
                                 scanButtonAliquot.performClick()
                             }
                         } else {
+                            showToast("$responseCodeExt")
                             showToast("Error, $aliquot couldn't be added to database.")
                         }
 
@@ -744,7 +761,7 @@ class LabAliquotingActivity : BaseActivity() {
         val printerDetails = PrinterManager.printerDetails
 
         val selectedFileName = when (printerDetails.printerModel) {
-            //"M211" -> R.raw.template_m211_aliquot
+            "M211" -> R.raw.template_m211_aliquot
             "M511" -> R.raw.template_m511_aliquot
             else -> throw IllegalArgumentException("${printerDetails.printerModel} is not supported.")
         }

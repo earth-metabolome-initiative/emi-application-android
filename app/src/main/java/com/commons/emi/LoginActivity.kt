@@ -159,7 +159,7 @@ class LoginActivity : BaseActivity() {
             CoroutineScope(Dispatchers.Main).launch {
                 val accessToken = withContext(Dispatchers.IO) {
                     DatabaseManager.initialize(baseUrl, username, password)
-                    delay(1500)
+                    delay(5000)
                     DatabaseManager.getAccessToken()
                 }
 

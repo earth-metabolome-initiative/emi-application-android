@@ -20,7 +20,16 @@ class HomeLabActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        title = "Lab screen"
+        title = "Laboratory"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Login", LoginActivity::class.java),
+            Pair("Home", HomeActivity::class.java),
+            Pair("Laboratory", null)
+        )
+
+        setBreadcrumbs(breadcrumbs)
 
         batchButton = findViewById(R.id.batchButton)
         preparingButton = findViewById(R.id.preparingButton)

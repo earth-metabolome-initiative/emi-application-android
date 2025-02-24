@@ -214,6 +214,50 @@ object DatabaseManager {
         }
     }
 
+    suspend fun getContainerId(container: String): Int = withContext(Dispatchers.IO) {
+        try {
+            val result: Int
+
+            val collectionUrl = if (container.matches(Regex("^container_\\dx\\d_\\d{6}\$")) || container == "absent") {
+                "${getInstance()}/items/Containers?filter[old_id][_eq]=$container&&limit=1"
+            } else {
+                "${getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
+            }
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val id = firstItem.optInt("id")
+                        result = id
+                    } else {
+                        result = -3 // no data found
+                    }
+                } else {
+                    result = -4 //response body null
+                }
+            } else {
+                result = -5// non 200 response
+            }
+            result
+        } catch (e: IOException) {
+            -6 // internet or other errors
+        }
+    }
+
     suspend fun getContainerIdIfNew(container: String): Int = withContext(Dispatchers.IO) {
         try {
             val result: Int
@@ -389,7 +433,6 @@ object DatabaseManager {
                         if (isFinite) {
                             val columns = firstItem.optInt("columns")
                             val rows = firstItem.optInt("rows")
-                            val id = firstItem.optInt("id")
                             // Check if columns and rows are valid
                             val capacity = columns * rows
                             if (capacity == 1) {
@@ -397,7 +440,7 @@ object DatabaseManager {
                                 result
 
                             } else {
-                                val load = checkLoad(id)
+                                val load = checkLoad(containerId)
                                 if (load == -1) {
                                     -2
                                 } else {
@@ -426,54 +469,31 @@ object DatabaseManager {
         }
     }
 
-    private suspend fun checkLoad(id: Int): Int = withContext(Dispatchers.IO) {
+    private suspend fun checkLoad(containerId: Int): Int = withContext(Dispatchers.IO) {
         try {
             // Prepare the URLs
-            val collectionUrlDried =
-                "${getInstance()}/items/Dried_Samples_Data?filter[parent_container][_eq]=$id&&limit=-1"
-            val collectionUrlExt =
-                "${getInstance()}/items/Extraction_Data?filter[container_id][_eq]=$id&&limit=-1"
-            val collectionUrlAl =
-                "${getInstance()}/items/Aliquoting_Data?filter[container_id][_eq]=$id&&limit=-1"
+            val collectionUrl = "${getInstance()}/items/Containers?filter[parent_container][_eq]=$containerId"
 
             // Initialize the HTTP client
             val client = OkHttpClient()
 
             // Prepare the requests
-            val requestDried = Request.Builder()
+            val request = Request.Builder()
                 .addHeader("Accept", "application/json")
-                .url(collectionUrlDried)
-                .build()
-            val requestExt = Request.Builder()
-                .addHeader("Accept", "application/json")
-                .url(collectionUrlExt)
-                .build()
-            val requestAl = Request.Builder()
-                .addHeader("Accept", "application/json")
-                .url(collectionUrlAl)
+                .url(collectionUrl)
                 .build()
 
             // Execute the requests
-            val responseDried = client.newCall(requestDried).execute()
-            val responseExt = client.newCall(requestExt).execute()
-            val responseAl = client.newCall(requestAl).execute()
+            val response = client.newCall(request).execute()
 
             // Initialize total count
             val totalCount: Int
 
             // Parse the responses as JSON
-            val responseBodyDried = responseDried.body
-            val responseBodyExt = responseExt.body
-            val responseBodyAl = responseAl.body
-
-            // Count the items for each response
-            val countDried = countItems(responseBodyDried)
-            val countExt = countItems(responseBodyExt)
-            val countAl = countItems(responseBodyAl)
+            val responseBody = response.body
 
             // Sum the counts
-            totalCount = countDried + countExt + countAl
-            //}
+            totalCount = countItems(responseBody)
 
             // Return the total count
             totalCount
@@ -742,57 +762,133 @@ object DatabaseManager {
         }
     }
 
-    suspend fun createContainer (containerId: String,
-        containerModel: Int,
-        reserved: Boolean,
-        used: Boolean,
-        isFinite: Boolean,
-        columns: Int,
-        columnsNumeric: Boolean,
-        rows: Int,
-        rowsNumeric: Boolean,
-        ): Int = withContext(Dispatchers.IO) {
-        // Perform the POST request to add the values on directus
+    suspend fun getFullPath(container: String): String {
+        return buildPath(container)
+    }
+
+    private suspend fun buildPath(container: String): String {
+        val currentContainer = getLocation(container)
+
+        // If the current container's location is "no_data", return immediately
+        if (currentContainer == "no_data" || currentContainer == "null") return "no data found"
+
+        // Get the parent container from the current container details
+        val collectionUrl = "${getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .addHeader("Accept", "application/json")
+            .url(collectionUrl)
+            .build()
+
+        val response = client.newCall(request).execute()
+        if (response.code == HttpURLConnection.HTTP_OK) {
+            val responseBody = response.body?.string()
+            if (responseBody != null) {
+                val jsonObject = JSONObject(responseBody)
+                val dataArray = jsonObject.getJSONArray("data")
+
+                if (dataArray.length() > 0) {
+                    val firstItem = dataArray.getJSONObject(0)
+                    val parentId = firstItem.optInt("parent_container", -1)
+
+                    // If there is no parent container, we are at the top-level container
+                    if (parentId == -1) {
+                        return ""
+                    }
+
+                    // Get the parent container string
+                    val parentContainerString = getContainerString(parentId)
+
+                    // Recursively build the path by calling buildPath for the parent container
+                    return "$currentContainer > ${buildPath(parentContainerString)}"
+                }
+            }
+        }
+        return "Error retrieving full path" // error handling if something fails
+    }
+
+    private suspend fun getLocation(container: String): String = withContext(Dispatchers.IO) {
         try {
-            // Retrieve primary keys, token and URL
-            val collectionUrl = getInstance() + "/items/Containers"
-            val accessToken = getAccessToken()
+            val result: String
+
+            val collectionUrl = "${getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
 
             val client = OkHttpClient()
-
-            val jsonBody = JSONObject().apply {
-                put("container_id", containerId)
-                put("container_model", containerModel)
-                put("status", "present")
-                put("reserved", reserved)
-                put("used", used)
-                put("is_finite", isFinite)
-                put("columns", columns)
-                put("columns_numeric", columnsNumeric)
-                put("rows", rows)
-                put("rows_numeric", rowsNumeric)
-            }
-
-            val requestBody = jsonBody.toString()
-                .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-
             val request = Request.Builder()
+                .addHeader("Accept", "application/json")
                 .url(collectionUrl)
-                .addHeader("Authorization", "Bearer $accessToken")
-                .post(requestBody)
                 .build()
 
             val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
 
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
 
-            val responseCode = response.code
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                1
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val parentId = firstItem.optInt("parent_container")
+                        val parent = getContainerString(parentId)
+                        result = parent
+                        result
+                    } else {
+                        result = "no_data" // no data found
+                        result
+                    }
+                } else {
+                    result = "null" //response body null
+                    result
+                }
             } else {
-                -1
+                "non_200"// non 200 response
             }
         } catch (e: IOException) {
-            -2
+            "internet" // internet or other errors
+        }
+    }
+
+    private suspend fun getContainerString(containerId: Int): String = withContext(Dispatchers.IO) {
+        try {
+            val result: String
+
+            val collectionUrl = "${getInstance()}/items/Containers?filter[id][_eq]=$containerId&&limit=1"
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .addHeader("Accept", "application/json")
+                .url(collectionUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.code == HttpURLConnection.HTTP_OK) {
+                val responseBody = response.body?.string()
+
+                // Check if response body is not null and parse it
+                if (responseBody != null) {
+                    val jsonObject = JSONObject(responseBody)
+                    val dataArray = jsonObject.getJSONArray("data")
+
+                    if (dataArray.length() > 0) {
+                        val firstItem = dataArray.getJSONObject(0)
+                        val container = firstItem.optString("container_id")
+                        result = container
+                        result
+                    } else {
+                        result = "no_data"
+                        result
+                    }
+                } else {
+                    result = "null"
+                    result
+                }
+            } else {
+                "non_200"
+            }
+        } catch (e: IOException) {
+            "internet_error"
         }
     }
 }

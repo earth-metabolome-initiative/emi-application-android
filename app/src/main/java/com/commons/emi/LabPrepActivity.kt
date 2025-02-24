@@ -83,7 +83,18 @@ class LabPrepActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        title = "Preparation screen"
+        title = "Preparation"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Login", LoginActivity::class.java),
+            Pair("Home", HomeActivity::class.java),
+            Pair("Laboratory", HomeLabActivity::class.java),
+            Pair("Preparation", null)
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
 
         // Initialize objects views
         containerLayout = findViewById(R.id.containerLayout)
@@ -450,15 +461,16 @@ class LabPrepActivity : BaseActivity() {
     fun handleObjectScan(sample: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val isPairLegal = DatabaseManager.checkContainerHierarchy(containerModelId, sampleContainerModelId)
-            if (isPairLegal) {
+            if (isPairLegal && sampleContainerId > 0 && containerModelId > 0) {
                 withContext(Dispatchers.IO) {
                     sendDataToDirectus(sampleContainerId, containerId, sample)
+                    Log.d("send data", "sampleContainerId: $sampleContainerId, containerId: $containerId, sample: $sample")
                 }
             } else {
                 withContext(Dispatchers.Main) {
                     emptyPlace.setTextColor(Color.RED)
                     emptyPlace.text =
-                        "Invalid pair. You are not allowed to put this child container in this parent container."
+                        "Invalid pair. Possible reasons:\n- sample container is invalid or doesn't exist\n- parent container is invalid or doesn't exist\n- the pair is not allowed."
                 }
             }
         }
@@ -481,6 +493,7 @@ class LabPrepActivity : BaseActivity() {
 
             val jsonBody = JSONObject().apply {
                 put("container_model", sampleContainerModelId)
+                put("parent_container", containerId)
             }
 
             val requestBody = jsonBody.toString()

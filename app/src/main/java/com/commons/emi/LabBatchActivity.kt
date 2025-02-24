@@ -20,7 +20,18 @@ class LabBatchActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        title = "Batch screen"
+        title = "Batches"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Login", LoginActivity::class.java),
+            Pair("Home", HomeActivity::class.java),
+            Pair("Laboratory", HomeLabActivity::class.java),
+            Pair("Batches", null)
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
 
         driedBatchButton = findViewById(R.id.driedBatchButton)
         extractionBatchButton = findViewById(R.id.extractionBatchButton)

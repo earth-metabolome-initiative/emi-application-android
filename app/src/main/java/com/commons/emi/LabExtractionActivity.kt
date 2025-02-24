@@ -117,7 +117,17 @@ class LabExtractionActivity : BaseActivity() {
 
         checkPrinterConnection()
 
-        title = "Extraction screen"
+        title = "Extraction"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Home", HomeActivity::class.java),
+            Pair("Laboratory", HomeLabActivity::class.java),
+            Pair("Extraction", null)
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
 
         // Initialize views
         textSummary = findViewById(R.id.textSummary)
@@ -746,6 +756,7 @@ class LabExtractionActivity : BaseActivity() {
 
             val jsonBody = JSONObject().apply {
                 put("container_model", sampleContainerModelId)
+                put("parent_container", containerId)
             }
 
             val requestBody = jsonBody.toString()
@@ -820,7 +831,7 @@ class LabExtractionActivity : BaseActivity() {
         val printerDetails = PrinterManager.printerDetails
 
         val selectedFileName = when (printerDetails.printerModel) {
-            //"M211" -> R.raw.template_m211_extract
+            "M211" -> R.raw.template_m211_extract
             "M511" -> R.raw.template_m511_extract
             else -> throw IllegalArgumentException("${printerDetails.printerModel} is not supported.")
         }
@@ -869,7 +880,6 @@ class LabExtractionActivity : BaseActivity() {
         printThread.start()
     }
 
-    @SuppressLint("SetTextI18n")
     private fun visibilityManager () {
         if (isMethodFilled) {
             volumeLayout.visibility = View.VISIBLE

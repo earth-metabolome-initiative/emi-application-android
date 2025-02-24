@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -17,6 +18,7 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.camera.view.PreviewView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +72,18 @@ class LogisticAttributingActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        title = "Containers screen"
+        title = "Labels"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Login", LoginActivity::class.java),
+            Pair("Home", HomeActivity::class.java),
+            Pair("Logistic", HomeLogisticActivity::class.java),
+            Pair("Labels", null)
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
 
         // Initialize objects views
         containerModelLayout = findViewById(R.id.containerModelLayout)
@@ -116,6 +129,7 @@ class LogisticAttributingActivity : BaseActivity() {
                 isQrScannerActive = false
                 visibilityManager()
                 scanButtonContainer.textSize = 25f
+                scanButtonContainer.setTextColor(Color.WHITE)
                 scanButtonContainer.text = scannedContainer
                 manageScan()
             }
@@ -256,6 +270,7 @@ class LogisticAttributingActivity : BaseActivity() {
                         withContext(Dispatchers.Main) {
                             scanButtonContainer.setTextColor(Color.RED)
                             scanButtonContainer.text = "Container already attributed"
+
                         }
                     }
                     in -2 downTo -3 -> {

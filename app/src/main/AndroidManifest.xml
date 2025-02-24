@@ -47,15 +47,7 @@
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false" />
         <activity
-            android:name=".SearchSpeciesActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:exported="false" />
-        <activity
-            android:name=".SearchRangeActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:exported="false" />
-        <activity
-            android:name=".SearchSampleActivity"
+            android:name=".SearchActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false" />
         <activity
@@ -84,9 +76,6 @@
             android:exported="false" />
         <activity
             android:name=".HomeSignalingActivity"
-            android:exported="false" />
-        <activity
-            android:name=".HomeSearchActivity"
             android:exported="false" />
         <activity
             android:name=".HomeLogisticActivity"

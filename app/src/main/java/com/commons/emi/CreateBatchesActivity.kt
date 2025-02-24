@@ -213,6 +213,7 @@ class CreateBatchesActivity : BaseActivity() {
         // Select template for batch print
         val selectedFileNameBatch = when (printerDetails.printerModel) {
             "M511" -> R.raw.template_m511_sample
+            "M211" -> R.raw.template_m211_sample
             else -> throw IllegalArgumentException("${printerDetails.printerModel} is not supported.")
         }
 
@@ -280,6 +281,7 @@ class CreateBatchesActivity : BaseActivity() {
         // Select template for blank print
         val selectedFileNameBlank = when (printerDetails.printerModel) {
             "M511" -> R.raw.template_m511_sample
+            "M211" -> R.raw.template_m211_sample
             else -> throw IllegalArgumentException("${printerDetails.printerModel} is not supported.")
         }
 

@@ -18,7 +18,15 @@ class HomeSignalingActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        title = "Signaling screen"
+        title = "Reporting"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Home", HomeActivity::class.java),
+            Pair("Reporting", null)
+        )
+
+        setBreadcrumbs(breadcrumbs)
 
         simpleButton = findViewById(R.id.simpleButton)
         recursiveButton = findViewById(R.id.recursiveButton)

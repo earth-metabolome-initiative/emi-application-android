@@ -3,6 +3,7 @@ package com.commons.emi
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
@@ -14,6 +15,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import java.io.IOException
+import java.net.HttpURLConnection
 
 class LogisticMovingActivity : BaseActivity() {
 
@@ -53,7 +61,19 @@ class LogisticMovingActivity : BaseActivity() {
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        title = "Moving screen"
+
+        title = "Move containers"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Login", LoginActivity::class.java),
+            Pair("Home", HomeActivity::class.java),
+            Pair("Logistic", HomeLogisticActivity::class.java),
+            Pair("Move containers", null)
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
 
         parentContainerLayout = findViewById(R.id.parentContainerLayout)
         textParentContainer = findViewById(R.id.textParentContainer)
@@ -62,7 +82,7 @@ class LogisticMovingActivity : BaseActivity() {
 
         childContainerLayout = findViewById(R.id.childContainerLayout)
         textChildContainer = findViewById(R.id.textChildContainer)
-        scanButtonParentContainer = findViewById(R.id.scanButtonParentContainer)
+        scanButtonChildContainer = findViewById(R.id.scanButtonChildContainer)
 
         scanLayout = findViewById(R.id.scanLayout)
         previewView = findViewById(R.id.previewView)
@@ -121,6 +141,7 @@ class LogisticMovingActivity : BaseActivity() {
                 parentContainerId = DatabaseManager.getContainerIdIfValid(scanButtonParentContainer.text.toString(), false)
                 val places = DatabaseManager.checkContainerLoad(parentContainerId)
                 parentContainerModelId = DatabaseManager.getContainerModelId(parentContainerId)
+                Log.d("parent container models", "places: $places, parentContainerId: $parentContainerId, parentModelContainerId: $parentContainerModelId")
                 withContext(Dispatchers.Main) {
                     handleParentContainerScan(places)
                 }
@@ -128,10 +149,12 @@ class LogisticMovingActivity : BaseActivity() {
         } else if (isChildScanActive) {
             CoroutineScope(Dispatchers.IO).launch {
                 val childContainer = scanButtonChildContainer.text.toString()
-                childContainerId = DatabaseManager.getContainerIdIfValid(childContainer, false)
+                val parentContainer = scanButtonParentContainer.text.toString()
+                childContainerId = DatabaseManager.getContainerId(childContainer)
                 childContainerModelId = DatabaseManager.getContainerModelId(childContainerId)
+                Log.d("child container models", "places: childContainerId: $childContainerId, childContainerModelId: $childContainerModelId")
                 withContext(Dispatchers.Main) {
-                    handleChildContainerScan(childContainer)
+                    handleChildContainerScan(childContainer, parentContainer)
                 }
             }
         }
@@ -198,12 +221,12 @@ class LogisticMovingActivity : BaseActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    fun handleChildContainerScan(childContainer: String) {
+    fun handleChildContainerScan(childContainer: String, parentContainer: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val isPairLegal = DatabaseManager.checkContainerHierarchy(parentContainerModelId, childContainerModelId)
             if (isPairLegal) {
                 withContext(Dispatchers.IO) {
-                    //sendDataToDirectus(childContainerId, parentContainerId, childContainer)
+                    sendDataToDirectus(parentContainer, childContainer, parentContainerId, childContainerId)
                 }
             } else {
                 withContext(Dispatchers.Main) {
@@ -212,6 +235,55 @@ class LogisticMovingActivity : BaseActivity() {
                         "Invalid pair. You are not allowed to put this child container in this parent container."
                 }
             }
+        }
+    }
+
+    // Function to send data to Directus
+    @SuppressLint("SetTextI18n")
+    private suspend fun sendDataToDirectus(
+        parentContainer: String,
+        childContainer: String,
+        parentContainerId: Int,
+        childContainerId: Int
+    ) {
+        // Perform the PATCH request to add the values on directus
+        try {
+            // Retrieve primary keys, token and URL
+            val collectionUrl = "${DatabaseManager.getInstance()}/items/Containers/$childContainerId"
+            val accessToken = DatabaseManager.getAccessToken()
+
+            val client = OkHttpClient()
+
+            val jsonBody = JSONObject().apply {
+                put("parent_container", parentContainerId)
+            }
+
+            val requestBody = jsonBody.toString()
+                .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+
+            val request = Request.Builder()
+                .url(collectionUrl)
+                .addHeader("Authorization", "Bearer $accessToken")
+                .patch(requestBody)
+                .build()
+
+            val response = client.newCall(request).execute()
+
+            val responseCode = response.code
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                withContext(Dispatchers.Main) {
+                    showToast("$childContainer correctly added to $parentContainer")
+
+                    // Check if there is still enough place in the container before initiating the QR code reader
+                    val places = DatabaseManager.checkContainerLoad(parentContainerId)
+                    handleParentContainerScan(places)
+                    if (places > 0) {
+                        scanButtonChildContainer.performClick()
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            showToast("Error: $e")
         }
     }
 

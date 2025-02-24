@@ -1,0 +1,259 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:padding="8dp">
+
+    <!-- Centering LinearLayout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <!-- ScrollView to contain the main content -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            tools:ignore="UselessParent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/textSearch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Search by"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp"
+                    tools:ignore="HardcodedText" />
+
+                <!-- Spinner for Extraction Method -->
+                <Spinner
+                    android:id="@+id/searchSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:spinnerMode="dropdown"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <LinearLayout
+                    android:id="@+id/sampleLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:layout_marginBottom="40dp"
+                    android:gravity="center">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:gravity="center">
+
+                        <!-- Spinner for Extraction Method -->
+                        <Spinner
+                            android:id="@+id/projectsSpinner"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.25"
+                            android:layout_marginBottom="8dp"
+                            android:spinnerMode="dropdown"
+                            tools:ignore="TouchTargetSizeCheck" />
+
+                        <!-- Solvent Volume EditText -->
+                        <EditText
+                            android:id="@+id/idEntry"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.35"
+                            android:autofillHints=""
+                            android:hint="000001"
+                            android:textSize="30sp"
+                            android:gravity="center"
+                            android:inputType="number"
+                            tools:ignore="HardcodedText"  />
+
+                        <EditText
+                            android:id="@+id/extractEntry"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.2"
+                            android:autofillHints=""
+                            android:hint="01"
+                            android:textSize="30sp"
+                            android:gravity="center"
+                            android:inputType="number"
+                            tools:ignore="HardcodedText"  />
+
+                        <EditText
+                            android:id="@+id/aliquotEntry"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.2"
+                            android:autofillHints=""
+                            android:hint="01"
+                            android:textSize="30sp"
+                            android:gravity="center"
+                            android:inputType="number"
+                            tools:ignore="HardcodedText"  />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/rangeLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:layout_marginBottom="40dp"
+                    android:gravity="center">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:gravity="center">
+
+                        <!-- Spinner for Extraction Method -->
+                        <TextView
+                            android:id="@+id/textTo"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.25"
+                            android:text="to project"
+                            android:textSize="25sp"
+                            android:gravity="center"
+                            android:layout_marginBottom="8dp"
+                            tools:ignore="HardcodedText" />
+
+                        <!-- Solvent Volume EditText -->
+                        <EditText
+                            android:id="@+id/idEntryRange"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.35"
+                            android:autofillHints=""
+                            android:hint="000001"
+                            android:textSize="30sp"
+                            android:gravity="center"
+                            android:inputType="number"
+                            tools:ignore="HardcodedText"  />
+
+                        <EditText
+                            android:id="@+id/extractEntryRange"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.2"
+                            android:autofillHints=""
+                            android:hint="01"
+                            android:textSize="30sp"
+                            android:gravity="center"
+                            android:inputType="number"
+                            tools:ignore="HardcodedText"  />
+
+                        <EditText
+                            android:id="@+id/aliquotEntryRange"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.2"
+                            android:autofillHints=""
+                            android:hint="01"
+                            android:textSize="30sp"
+                            android:gravity="center"
+                            android:inputType="number"
+                            tools:ignore="HardcodedText"  />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/batchLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:layout_marginBottom="40dp"
+                    android:gravity="center">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/textBatch"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.4"
+                            android:text="batch"
+                            android:textSize="25sp"
+                            android:gravity="center"
+                            android:layout_marginBottom="8dp"
+                            tools:ignore="HardcodedText" />
+
+                        <!-- Solvent Volume EditText -->
+                        <EditText
+                            android:id="@+id/idEntryBatch"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.6"
+                            android:autofillHints=""
+                            android:hint="000001"
+                            android:textSize="30sp"
+                            android:gravity="center"
+                            android:inputType="number"
+                            tools:ignore="HardcodedText"  />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/searchButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:text="Search"
+                    android:textSize="30sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="16dp"
+                    tools:ignore="HardcodedText"  />
+
+                <TableLayout
+                    android:id="@+id/locationTableLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="1">
+
+                    <!-- Optional Header Row -->
+                    <TableRow>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Code"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Location"
+                            android:textStyle="bold"/>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</FrameLayout>

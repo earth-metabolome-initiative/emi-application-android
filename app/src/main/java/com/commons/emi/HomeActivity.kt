@@ -21,7 +21,15 @@ class HomeActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        title = "Home screen"
+        title = "Home"
+
+        // Define the breadcrumb path for Home
+        val breadcrumbs = listOf(
+            Pair("Home", null)
+        )
+
+        // Set breadcrumbs in com.bruelhart.coulage.ch.brulhart.farmapp.BaseActivity
+        setBreadcrumbs(breadcrumbs)
 
         // Request camera permission
         PermissionsManager.requestCameraPermission(this)
@@ -53,7 +61,7 @@ class HomeActivity : BaseActivity() {
 
         searchButton.setOnClickListener {
             if (checkCameraPermission()) {
-                val intent = Intent(this, HomeSearchActivity::class.java)
+                val intent = Intent(this, SearchActivity::class.java)
                 startActivity(intent)
             } else {
                 showToast()
