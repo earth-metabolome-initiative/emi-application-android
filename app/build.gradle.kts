@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.commons.emi"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.commons.emi"
-        minSdk = 29
-        targetSdk = 35
+        minSdk = 30
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -55,5 +55,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     //noinspection UseTomlInstead
-    implementation("com.bradyid:BradySdk:3.0.0")
+    implementation("com.bradyid:BradySdk:3.1.0")
 }

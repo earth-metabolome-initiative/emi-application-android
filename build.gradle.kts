@@ -2,5 +2,5 @@
 plugins {
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.jetbrainsKotlinAndroid) apply false
-    id("com.android.library") version "8.3.1" apply false
+    id("com.android.library") version "8.13.0" apply false
 }
