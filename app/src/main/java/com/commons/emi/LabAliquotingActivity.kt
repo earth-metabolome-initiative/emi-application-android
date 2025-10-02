@@ -3,7 +3,6 @@ package com.commons.emi
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.SpannableString
@@ -22,6 +21,7 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.view.PreviewView
+import androidx.core.net.toUri
 import com.bradysdk.api.printerconnection.CutOption
 import com.bradysdk.api.printerconnection.PrintingOptions
 import com.bradysdk.printengine.templateinterface.TemplateFactory
@@ -192,7 +192,7 @@ class LabAliquotingActivity : BaseActivity() {
         val clickableSpan = object : ClickableSpan() {
             override fun onClick(widget: View) {
                 val url = "${DatabaseManager.getInstance()}/admin/content/Container_Models/+"
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri())
                 startActivity(browserIntent)
             }
         }
@@ -614,7 +614,7 @@ class LabAliquotingActivity : BaseActivity() {
     }
 
     // Function to send data to Directus
-    private suspend fun sendDataToDirectus(extractId: Int, volume: Double, containerId: Int, extract: String) {
+    private fun sendDataToDirectus(extractId: Int, volume: Double, containerId: Int, extract: String) {
         // Define the table url
         val aliquot = checkExistenceInDirectus(extract)
         if (aliquot != null) {

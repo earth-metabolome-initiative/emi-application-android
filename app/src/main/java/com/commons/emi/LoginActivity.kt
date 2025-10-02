@@ -2,13 +2,13 @@ package com.commons.emi
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.net.toUri
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -24,7 +24,7 @@ class LoginActivity : BaseActivity() {
 
     // Initialize UI elements
     private lateinit var textViewBaseUrl: TextView
-    private lateinit var editTextBaseUrl:EditText
+    private lateinit var editTextBaseUrl: EditText
     private lateinit var welcomeMessage: TextView
     private lateinit var loginMessage: TextView
     private lateinit var textViewUsername: TextView
@@ -248,7 +248,7 @@ class LoginActivity : BaseActivity() {
         buttonLogin.setOnClickListener {
 
             val url = "https://github.com/digital-botanical-gardens-initiative/DBGI_tracking_android/releases/latest"
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri())
             startActivity(browserIntent)
         }
     }
