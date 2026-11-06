@@ -12,7 +12,7 @@
         android:id="@+id/attributeButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.5"
+        android:layout_weight="0.33"
         android:text="Attribute labels to containers"
         android:textSize="40sp"
         android:layout_marginBottom="8dp"
@@ -22,10 +22,19 @@
         android:id="@+id/moveButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.5"
+        android:layout_weight="0.33"
         android:text="Move containers"
         android:textSize="40sp"
         android:layout_marginBottom="16dp"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/tubeLabelButton"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.34"
+        android:text="Bag to tube: print sticker"
+        android:textSize="32sp"
         tools:ignore="HardcodedText" />
 
 </LinearLayout>

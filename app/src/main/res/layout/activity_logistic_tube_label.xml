@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select the type of tube receiving this sample"
+                android:textSize="24sp" />
+
+            <Spinner
+                android:id="@+id/tubeModelSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:contentDescription="New tube container type" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Choose Brady label size (Avery dimensions)"
+                android:textSize="24sp" />
+
+            <Spinner
+                android:id="@+id/tubeLabelSizeSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:contentDescription="Sticker size" />
+
+            <Button
+                android:id="@+id/tubeScanButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Scan sample bag QR code" />
+
+            <TextView
+                android:id="@+id/tubeScannedLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="No sample scanned"
+                android:textIsSelectable="true"
+                android:textSize="22sp" />
+
+            <Button
+                android:id="@+id/tubePrintButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Attribute tube type and print sticker" />
+
+            <TextView
+                android:id="@+id/tubeStatusLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:accessibilityLiveRegion="polite"
+                android:text="Loading tube types..."
+                android:textSize="18sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <include
+        android:id="@+id/scanLayout"
+        layout="@layout/scanner_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</FrameLayout>

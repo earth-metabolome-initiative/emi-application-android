@@ -570,14 +570,10 @@ class LabWeighingActivity : BaseActivity() {
 
                 val jsonBody = JSONObject().apply {
                     put("container_id", extractId)
+                    put("container_model", sampleContainerModelId)
                     put("status", "present")
                     put("reserved", true)
                     put("used", true)
-                    put("is_finite", true)
-                    put("columns", 1)
-                    put("columns_numeric", true)
-                    put("rows", 1)
-                    put("rows_numeric", true)
                 }
 
                 val requestBody = jsonBody.toString()
