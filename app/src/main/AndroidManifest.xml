@@ -78,6 +78,9 @@
             android:name=".HomeSignalingActivity"
             android:exported="false" />
         <activity
+            android:name=".LogisticTubeLabelActivity"
+            android:exported="false" />
+        <activity
             android:name=".HomeLogisticActivity"
             android:exported="false" />
         <activity

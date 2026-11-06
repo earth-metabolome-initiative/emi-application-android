@@ -41,14 +41,16 @@ object ScanManager{
     private var previewView: PreviewView? = null
     private var isFlashlightOn = false
     private var scanResultListener: ((String) -> Unit)? = null
+    private var scanGeneration = 0
     private lateinit var sharedPreferences: SharedPreferences
 
     // Modify initialize function to return the scanned value
     fun initialize(context: Context, previewView: PreviewView, flashlightButton: ImageButton, noneButton: Button? = null, callback: (String) -> Unit) {
+        val generation = ++scanGeneration
         this.previewView = previewView
         cameraExecutor = Executors.newSingleThreadExecutor()
         scanner = createBarcodeScanner()
-        startCamera(context)
+        startCamera(context, generation)
 
         this.flashlightButton = flashlightButton
         if (noneButton != null) {
@@ -90,9 +92,10 @@ object ScanManager{
         return BarcodeScanning.getClient(options)
     }
 
-    private fun startCamera(context: Context) {
+    private fun startCamera(context: Context, generation: Int) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
+            if (generation != scanGeneration) return@addListener
             cameraProvider = cameraProviderFuture.get()
             bindPreviewAndAnalysis(context)
         }, ContextCompat.getMainExecutor(context))
@@ -150,11 +153,11 @@ object ScanManager{
     }
 
     fun stopScanning() {
-        // Save the flashlight state to SharedPreferences when stopping scanning
+        scanGeneration++
+        scanResultListener = null
         sharedPreferences.edit().putBoolean(PREF_FLASHLIGHT_STATE, isFlashlightOn).apply()
-
-        cameraProvider.unbindAll()
-        cameraExecutor.shutdown()
+        if (::cameraProvider.isInitialized) cameraProvider.unbindAll()
+        if (::cameraExecutor.isInitialized) cameraExecutor.shutdown()
     }
 
     private fun toggleFlashlight() {

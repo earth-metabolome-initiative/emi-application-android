@@ -8,6 +8,7 @@ class HomeLogisticActivity : BaseActivity() {
 
     private lateinit var attributeButton: Button
     private lateinit var moveButton: Button
+    private lateinit var tubeLabelButton: Button
 
     override fun getLayoutResourceId(): Int {
         return R.layout.activity_home_logistic
@@ -31,6 +32,7 @@ class HomeLogisticActivity : BaseActivity() {
 
         attributeButton = findViewById(R.id.attributeButton)
         moveButton = findViewById(R.id.moveButton)
+        tubeLabelButton = findViewById(R.id.tubeLabelButton)
 
         // Set up button click listeners here
         attributeButton.setOnClickListener {
@@ -41,6 +43,10 @@ class HomeLogisticActivity : BaseActivity() {
         moveButton.setOnClickListener {
             val intent = Intent(this, LogisticMovingActivity::class.java)
             startActivity(intent)
+        }
+
+        tubeLabelButton.setOnClickListener {
+            startActivity(Intent(this, LogisticTubeLabelActivity::class.java))
         }
     }
 }

@@ -54,10 +54,6 @@ class LogisticAttributingActivity : BaseActivity() {
     private var choices: List<String> = mutableListOf("Choose an option")
     private var containerModelId: Int = 0
     private var containerId: Int = 0
-    private var column: Int = 0
-    private var row: Int = 0
-    private var columnNumeric: Boolean = false
-    private var rowNumeric: Boolean = false
 
     // Define trackers
     private var isContainerModelFilled = false
@@ -163,10 +159,6 @@ class LogisticAttributingActivity : BaseActivity() {
 
                     val values = ArrayList<String>()
                     val ids = HashMap<String, Int>()
-                    val columns = HashMap<String, Int>()
-                    val rows = HashMap<String, Int>()
-                    val columnsNumeric = HashMap<String, Boolean>()
-                    val rowsNumeric = HashMap<String, Boolean>()
 
                     // Add "Choose an option" to the list of values
                     values.add("Choose a container model")
@@ -184,17 +176,9 @@ class LogisticAttributingActivity : BaseActivity() {
                                 val volumeUnit = DatabaseManager.getUnit(volumeUnitId)
                                 val brandId = item.optInt("brand")
                                 val brand = DatabaseManager.getBrand(brandId)
-                                val column = item.optInt("columns")
-                                val row = item.optInt("rows")
-                                val columnNumeric = item.optBoolean("columns_numeric")
-                                val rowNumeric = item.optBoolean("rows_numeric")
                                 val value = "$containerType $volume $volumeUnit $brand"
                                 values.add(value)
                                 ids[value] = id
-                                columns[value] = column
-                                rows[value] = row
-                                columnsNumeric[value] = columnNumeric
-                                rowsNumeric[value] = rowNumeric
                             }
                         }
                     }
@@ -223,10 +207,6 @@ class LogisticAttributingActivity : BaseActivity() {
                                     if (position > 0) { // Check if a valid option (not "Choose an option") is selected
                                         val selectedValue = values[position]
                                         containerModelId = ids[selectedValue].toString().toInt()
-                                        column = columns[selectedValue].toString().toInt()
-                                        row = rows[selectedValue].toString().toInt()
-                                        columnNumeric = columnsNumeric[selectedValue].toString().toBoolean()
-                                        rowNumeric = rowsNumeric[selectedValue].toString().toBoolean()
                                         isContainerModelFilled = true
                                         visibilityManager()
                                     } else {
@@ -299,15 +279,9 @@ class LogisticAttributingActivity : BaseActivity() {
             val accessToken = DatabaseManager.getAccessToken()
 
             val client = OkHttpClient()
-
             val jsonBody = JSONObject().apply {
                 put("container_model", containerModelId)
                 put("used", true)
-                put("is_finite", true)
-                put("columns", column)
-                put("columns_numeric", columnNumeric)
-                put("rows", row)
-                put("rows_numeric", rowNumeric)
 
             }
 

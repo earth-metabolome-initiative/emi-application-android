@@ -148,14 +148,15 @@ object DatabaseManager {
             val result: Int
 
             val collectionUrl = if (container.matches(Regex("^container_\\dx\\d_\\d{6}\$")) || container == "absent") {
-                "${getInstance()}/items/Containers?filter[old_id][_eq]=$container&&limit=1"
+                "${getInstance()}/items/Containers?fields=id,container_model.columns,container_model.rows&filter[old_id][_eq]=$container&limit=1"
             } else {
-                "${getInstance()}/items/Containers?filter[container_id][_eq]=$container&&limit=1"
+                "${getInstance()}/items/Containers?fields=id,container_model.columns,container_model.rows&filter[container_id][_eq]=$container&limit=1"
             }
 
             val client = OkHttpClient()
             val request = Request.Builder()
                 .addHeader("Accept", "application/json")
+                .apply { getAccessToken()?.let { addHeader("Authorization", "Bearer $it") } }
                 .url(collectionUrl)
                 .build()
 
@@ -171,33 +172,12 @@ object DatabaseManager {
                     if (dataArray.length() > 0) {
                         val firstItem = dataArray.getJSONObject(0)
                         val id = firstItem.optInt("id")
-                        val isFinite = firstItem.optBoolean("is_finite")
-                        val columns = firstItem.optInt("columns")
-                        val rows = firstItem.optInt("rows")
-                        if (isSampleContainer) {
-                            result = if (isFinite) {
-                                // Check if columns and rows are valid
-                                val capacity = columns * rows
-                                if (capacity == 1) {
-                                    id
-                                } else {
-                                    -1
-                                }
-                            } else {
-                                -1
-                            }
-                        } else {
-                            if (isFinite) {
-                                // Check if columns and rows are valid
-                                val capacity = columns * rows
-                                result = if (capacity > 1) {
-                                    id
-                                } else {
-                                    -1
-                                }
-                            } else {
-                                result = id
-                            }
+                        val capacity = capacityFromContainerModel(firstItem)
+                        result = when {
+                            capacity == 0 -> -1 // Missing or invalid model dimensions.
+                            capacity == -1 -> if (isSampleContainer) -1 else id
+                            isSampleContainer == (capacity == 1) -> id
+                            else -> -1
                         }
                     } else {
                         result = -3 // no data found
@@ -405,17 +385,25 @@ object DatabaseManager {
         }
     }
 
+    internal fun capacityFromContainerModel(container: JSONObject): Int {
+        val model = container.optJSONObject("container_model") ?: return 0
+        if (!model.has("columns") || !model.has("rows") ||
+            model.isNull("columns") || model.isNull("rows")) return 0
+        return capacityFromDimensions(model.optInt("columns"), model.optInt("rows"))
+    }
+
     suspend fun checkContainerLoad(containerId: Int): Int = withContext(Dispatchers.IO) {
         try {
             val result: Int
 
             // support old container names to avoid changing all labels
-            val collectionUrl = "${getInstance()}/items/Containers?filter[id][_eq]=$containerId&&limit=1"
+            val collectionUrl = "${getInstance()}/items/Containers?fields=id,container_model.columns,container_model.rows&filter[id][_eq]=$containerId&limit=1"
 
             val client = OkHttpClient()
             val request = Request.Builder()
                 .addHeader("Accept", "application/json")
                 .url(collectionUrl)
+                .apply { getAccessToken()?.let { addHeader("Authorization", "Bearer $it") } }
                 .build()
 
             val response = client.newCall(request).execute()
@@ -428,30 +416,14 @@ object DatabaseManager {
                     val dataArray = jsonObject.getJSONArray("data")
 
                     if (dataArray.length() > 0) {
-                        val firstItem = dataArray.getJSONObject(0)
-                        val isFinite = firstItem.optBoolean("is_finite")
-                        if (isFinite) {
-                            val columns = firstItem.optInt("columns")
-                            val rows = firstItem.optInt("rows")
-                            // Check if columns and rows are valid
-                            val capacity = columns * rows
-                            if (capacity == 1) {
-                                result = -1
-                                result
-
-                            } else {
+                        when (val capacity = capacityFromContainerModel(dataArray.getJSONObject(0))) {
+                            0 -> -4 // Missing or invalid model dimensions.
+                            -1 -> -3 // Container model has unlimited places.
+                            1 -> -1 // Sample container.
+                            else -> {
                                 val load = checkLoad(containerId)
-                                if (load == -1) {
-                                    -2
-                                } else {
-                                    result = capacity - load
-                                    result
-                                }
+                                if (load == -1) -2 else capacity - load
                             }
-
-                        } else {
-                            result = -3 // container not finite
-                            result
                         }
                     } else {
                         result = -4 // no data found
