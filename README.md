@@ -60,8 +60,8 @@ Wi-Fi client isolation or firewall rules can block them. Do not expose ADB
 ports to the internet. Sign in to Directus in **EMI (Debug)**, scan a container
 assigned model 7 (e.g. container 14509) and verify the app reports remaining
 places based on 81 minus occupied places. Also test a 1 × 1 sample container
-and a model with `-1`/`-1` dimensions. The release build retains package
-`com.commons.emi` and requires its original signing key for upgrades.
+and a model with `-1`/`-1` dimensions. The separately signed production build
+uses `com.commons.emi.production`; it does not replace either existing icon.
 
 ## Bag-to-tube labels
 
@@ -119,21 +119,42 @@ and check the printer before retrying so you do not produce duplicate stickers.
 Verify the printed QR by scanning the new tube and confirming it resolves to
 the same sample. This changes a live Directus record: use a test sample first.
 
-## Release
+## Independent production release
 
-This branch sets `versionCode = 3` and `versionName = \"1.2\"`. After device
-testing, build and sign with the **same original release keystore** used for
-installed releases. The repository does not contain a release signing key
-or signing configuration. A new key cannot update an already installed app.
+The existing `com.commons.emi` installation was signed by an unavailable key.
+The release build instead uses `com.commons.emi.production` and appears as
+**EMI (Production)**. Debug remains `com.commons.emi.debug`. These are three
+separate apps; the production app starts with its own local data and requires
+a new Directus login. It uses the same remote Directus records.
+
+Create a **permanent institutional signing key once** on the server. The
+keystore and its passwords must be backed up securely outside Git; losing
+them would prevent updates to the new production app as well. Run the
+following interactively and choose a strong password when prompted (do not
+put it in the command line or send it in chat):
+
+```sh
+umask 077
+mkdir -p "$HOME/.local/share/emi-signing"
+keytool -genkeypair -v \
+  -keystore "$HOME/.local/share/emi-signing/emi-production.jks" \
+  -alias emi-production -keyalg RSA -keysize 4096 -validity 10000
+```
+
+From this repository, with `ANDROID_HOME` and build-tools on `PATH` as above:
 
 ```sh
 ./gradlew :app:assembleRelease
-zipalign -f 4 app/build/outputs/apk/release/app-release-unsigned.apk /tmp/emi-aligned.apk
-apksigner sign --ks /secure/path/to/original-release.jks --ks-key-alias YOUR_ALIAS \
-  --out /tmp/emi-v1.2.apk /tmp/emi-aligned.apk
-apksigner verify --print-certs /tmp/emi-v1.2.apk
+zipalign -f 4 app/build/outputs/apk/release/app-release-unsigned.apk /tmp/emi-production-aligned.apk
+apksigner sign --ks "$HOME/.local/share/emi-signing/emi-production.jks" \
+  --ks-key-alias emi-production \
+  --out /tmp/emi-production-v1.2.apk /tmp/emi-production-aligned.apk
+apksigner verify --print-certs /tmp/emi-production-v1.2.apk
+adb install -r /tmp/emi-production-v1.2.apk
+adb shell am start -n com.commons.emi.production/com.commons.emi.LoginActivity
 ```
 
-Compare the new certificate fingerprint to the existing signed APK before
-distributing the release, then install on a test phone using `adb install -r`.
-Keep the keystore and its passwords outside the repository.
+Verify one test sample and printer flow before switching from EMI (Debug).
+Neither the original EMI nor EMI (Debug) needs uninstalling. For later
+updates keep the same new keystore and package ID, increment `versionCode`,
+rebuild, re-sign, and use `adb install -r`.

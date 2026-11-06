@@ -21,6 +21,9 @@ android {
             applicationIdSuffix = ".debug"
         }
         release {
+            // The original com.commons.emi installation uses an unavailable key.
+            // Keep it and EMI (Debug) untouched; sign this separate app with a new institutional key.
+            applicationIdSuffix = ".production"
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
